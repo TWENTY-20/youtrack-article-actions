@@ -1,14 +1,14 @@
 {
-  "name": "youtrack-app-example",
-  "title": "YouTrack App Example",
-  "description": "Example description",
+  "name": "youtrack-article-actions",
+  "title": "YouTrack Article Actions",
+  "description": "Copy or move an article in the Knowledge Base",
   "version": "1.0.0",
-  "icon": "logo.svg",
+  "icon": "icons/copy.svg",
   "minYouTrackVersion": "2024.2",
   "widgets": [
     {
       "key": "article-menu-demo",
-      "name": "Demo item",
+      "name": "Copy",
       "indexPath": "index.html",
       "extensionPoint": "ARTICLE_OPTIONS_MENU_ITEM",
       "expectedDimensions": {
