@@ -1,0 +1,20 @@
+{
+  "name": "youtrack-app-example",
+  "title": "YouTrack App Example",
+  "description": "Example description",
+  "version": "1.0.0",
+  "icon": "logo.svg",
+  "minYouTrackVersion": "2024.2",
+  "widgets": [
+    {
+      "key": "article-menu-demo",
+      "name": "Demo item",
+      "indexPath": "index.html",
+      "extensionPoint": "ARTICLE_OPTIONS_MENU_ITEM",
+      "expectedDimensions": {
+        "height": 400,
+        "width": 400
+      }
+    }
+  ]
+}
