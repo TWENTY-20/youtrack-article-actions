@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Article, Project } from "./types.ts";
+import { APIError, Article, Project } from "./types.ts";
 import Select from "@jetbrains/ring-ui-built/components/select/select";
 import { useTranslation } from "react-i18next";
 import { copyArticle, loadArticle, loadProjects, moveArticle } from "./api.ts";
@@ -10,7 +10,7 @@ import ButtonSet from "@jetbrains/ring-ui-built/components/button-set/button-set
 import { host } from "./youTrackApp.ts";
 
 //todo: permissions
-//todo: hide widget in draft menu
+//todo: hide widget in draft menu - currently not possible
 //todo: copy attachments
 //todo: copy child articles
 //todo: change parent article
@@ -18,12 +18,19 @@ export default function App() {
     const { t } = useTranslation();
 
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
     const [article, setArticle] = useState<Article>();
     const [projects, setProjects] = useState<Project[]>();
 
     useEffect(() => {
         loadArticle().then((res: Article) => {
             setArticle(res);
+        }).catch((err: APIError) => {
+            if (err.status === 500) {
+                setError(t("errorDraft"));
+                return;
+            }
+            setError(t("errorGeneral"));
         }).finally(() => setLoading(false));
     }, []);
 
@@ -34,7 +41,11 @@ export default function App() {
     );
 
     //todo: error
-    if (!article) return <></>;
+    if (!article) return (
+        <div className="w-full flex justify-center mt-12 text-base font-bold text-wrap">
+            <span>{error}</span>
+        </div>
+    );
 
     return (
         <form className="w-full flex flex-col ring-form">
@@ -82,16 +93,16 @@ export default function App() {
                 <Button primary disabled={!article.project} onClick={() => {
                     console.log(article);
                     copyArticle(article).then(() => {
-                        host.alert("Please close the modal and reload!")
-                    })
+                        host.alert("Please close the modal and reload!");
+                    });
                 }}>
                     {t("copyButtonLabel")}
                 </Button>
                 <Button disabled={!article.project} onClick={() => {
                     console.log(article);
                     moveArticle(article.idReadable, article.project!).then(() => {
-                        host.alert("Please close the modal and reload!")
-                    })
+                        host.alert("Please close the modal and reload!");
+                    });
                 }}>
                     {t("moveButtonLabel")}
                 </Button>

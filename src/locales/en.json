@@ -5,5 +5,7 @@
   "titleInputLabel": "Title",
   "projectSelectionLabel": "Project",
   "copyButtonLabel": "Copy",
-  "moveButtonLabel": "Move"
+  "moveButtonLabel": "Move",
+  "errorDraft": "Draft Articles can not be copied or moved!",
+  "errorGeneral": "Widget could not load Article details!"
 }
