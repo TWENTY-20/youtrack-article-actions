@@ -1,6 +1,7 @@
 import { AlertType } from "@jetbrains/ring-ui-built/components/alert/alert";
 import { AlertItem } from "@jetbrains/ring-ui-built/components/alert-service/alert-service";
 import { RequestParams } from "@jetbrains/ring-ui-built/components/http/http";
+import { ReactNode } from "react";
 
 export interface HttpHandler {
     endpoints: Array<Endpoint>;
@@ -55,7 +56,16 @@ export type Response = {
 }
 
 export interface Host {
-    alert: (message: "", type?: AlertType, timeout?: number, options?: Partial<AlertItem>) => void;
-    fetchYouTrack: (relativeURL: string, requestParams?: RequestParams) => Promise<any>;
-    fetchApp: (relativeURL: string, requestParams: RequestParams & { scope?: boolean }) => Promise<any>;
+    alert(message: ReactNode, type?: AlertType, timeout?: number, options?: Partial<AlertItem>): void;
+    fetchYouTrack(relativeURL: string, requestParams?: RequestParams): Promise<any>;
+    fetchApp(relativeURL: string, requestParams: RequestParams & { scope?: boolean }): Promise<any>;
+}
+
+export interface APIError {
+    data: {
+        error: string,
+        error_description: string
+    },
+    message: string,
+    status: number
 }
