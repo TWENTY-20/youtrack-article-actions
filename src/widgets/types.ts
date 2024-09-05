@@ -56,11 +56,18 @@ export type Response = {
 }
 
 export interface Host {
-    alert: (message: ReactNode, type?: AlertType, timeout?: number, options?: Partial<AlertItem>) => void;
-    fetchYouTrack: (relativeURL: string, requestParams?: RequestParams) => Promise<any>;
-    fetchApp: (relativeURL: string, requestParams: RequestParams & { scope?: boolean }) => Promise<any>;
-    collapse: () => Promise<void>;
-    exitModalMode: () => Promise<void>;
+    alert(message: ReactNode, type?: AlertType, timeout?: number, options?: Partial<AlertItem>): void;
+    fetchYouTrack(relativeURL: string, requestParams?: RequestParams): Promise<any>;
+    fetchApp(relativeURL: string, requestParams: RequestParams & { scope?: boolean }): Promise<any>;
+}
+
+export interface APIError {
+    data: {
+        error: string,
+        error_description: string
+    },
+    message: string,
+    status: number
 }
 
 export interface Article {
