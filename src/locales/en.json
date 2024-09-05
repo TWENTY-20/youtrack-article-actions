@@ -1,3 +1,9 @@
 {
-  "example": "Example"
+  "loading": "Loading...",
+  "filterItems": "Filter items",
+  "noOptionsFound": "No options found",
+  "titleInputLabel": "Title",
+  "projectSelectionLabel": "Project",
+  "copyButtonLabel": "Copy",
+  "moveButtonLabel": "Move"
 }

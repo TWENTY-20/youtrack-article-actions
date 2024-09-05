@@ -1,6 +1,7 @@
 import { AlertType } from "@jetbrains/ring-ui-built/components/alert/alert";
 import { AlertItem } from "@jetbrains/ring-ui-built/components/alert-service/alert-service";
 import { RequestParams } from "@jetbrains/ring-ui-built/components/http/http";
+import { ReactNode } from "react";
 
 export interface HttpHandler {
     endpoints: Array<Endpoint>;
@@ -35,7 +36,7 @@ export type Context<scope extends Scope> = {
 export type Request = {
     body: string;
     bodyAsStream: ReadableStream<Uint8Array>;
-    headers: Array<{name: string, value: string}>;
+    headers: Array<{ name: string, value: string }>;
     path: string;
     fullPath: string;
     method: Method;
@@ -55,7 +56,32 @@ export type Response = {
 }
 
 export interface Host {
-    alert: (message: "", type?: AlertType, timeout?: number, options?: Partial<AlertItem>) => void;
+    alert: (message: ReactNode, type?: AlertType, timeout?: number, options?: Partial<AlertItem>) => void;
     fetchYouTrack: (relativeURL: string, requestParams?: RequestParams) => Promise<any>;
     fetchApp: (relativeURL: string, requestParams: RequestParams & { scope?: boolean }) => Promise<any>;
+    collapse: () => Promise<void>;
+    exitModalMode: () => Promise<void>;
+}
+
+export interface Article {
+    readonly id: string,
+    readonly attachments: Array<{ readonly id: string }>,
+    readonly childArticles: Array<Pick<Article, "id" | "hasChildren">>,
+    readonly comments: Array<{ readonly id: string }>
+    content: string | null,
+    // readonly created: number,
+    readonly hasChildren: boolean,
+    readonly idReadable: string,
+    readonly ordinal: number,
+    project?: Project,
+    // readonly reporter: { readonly id: string } | null,
+    summary: string | null,
+    // readonly updated: number,
+    // readonly updatedBy: { readonly id: string } | null,
+    visibility: { readonly id: string } | null,
+}
+
+export interface Project {
+    readonly id: string,
+    readonly name: string,
 }

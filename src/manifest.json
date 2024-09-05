@@ -8,7 +8,7 @@
   "widgets": [
     {
       "key": "article-menu-demo",
-      "name": "Copy",
+      "name": "Copy Or Move",
       "indexPath": "index.html",
       "extensionPoint": "ARTICLE_OPTIONS_MENU_ITEM",
       "expectedDimensions": {
