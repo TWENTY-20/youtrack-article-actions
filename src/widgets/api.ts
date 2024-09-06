@@ -3,7 +3,7 @@ import { Article, Attachment, Project } from "./types.ts";
 
 export async function loadArticle(articleId: string) {
     return await host.fetchYouTrack(
-        `articles/${articleId}?fields=id,attachments(id),childArticles(id),comments(id),content,hasChildren,idReadable,ordinal,summary,visibility(id)`
+        `articles/${articleId}?fields=id,project(id,name),attachments(id),childArticles(id),comments(id),content,hasChildren,idReadable,ordinal,summary,visibility(id)`
     ) as Article;
 }
 

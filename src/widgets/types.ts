@@ -80,7 +80,7 @@ export interface Article {
     readonly hasChildren: boolean,
     readonly idReadable: string,
     readonly ordinal: number,
-    project?: Project,
+    project: Project,
     // readonly reporter: { readonly id: string } | null,
     summary: string | null,
     // readonly updated: number,

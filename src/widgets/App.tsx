@@ -96,14 +96,13 @@ export default function App() {
                                 project: item.model
                             });
                         }}
-                        // selected={toSelectItem(article.project)} Doesn't work as default todo
+                        selected={toSelectItem(article.project)}
                         size={Size.FULL}
                     />
                 </div>
             </div>
             <ButtonSet className="ring-form__group">
-                <Button primary disabled={!article.project} loader={buttonsLoading} onClick={() => {
-                    console.log(article);
+                <Button primary loader={buttonsLoading} onClick={() => {
                     setButtonsLoading(true);
                     handleArticleCopy(article).then((newArticleId) => {
                         redirectToArticle(newArticleId);
@@ -113,10 +112,9 @@ export default function App() {
                 }}>
                     {t("copyButtonLabel")}
                 </Button>
-                <Button disabled={!article.project} loader={buttonsLoading} onClick={() => {
-                    console.log(article);
+                <Button loader={buttonsLoading} onClick={() => {
                     setButtonsLoading(true);
-                    moveArticle(article.idReadable, article.project!).then(({ id }) => {
+                    moveArticle(article.idReadable, article.project).then(({ id }) => {
                         redirectToArticle(id);
                     }).catch(() => {
                         host.alert(t("errorMoveArticle"));
