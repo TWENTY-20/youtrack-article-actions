@@ -73,7 +73,7 @@ export interface APIError {
 export interface Article {
     readonly id: string,
     readonly attachments: Array<Pick<Attachment, "id">>,
-    readonly childArticles: Array<Pick<Article, "id" | "hasChildren">>,
+    readonly childArticles: Array<Pick<Article, "id">>,
     readonly comments: Array<{ readonly id: string }>
     content: string | null,
     // readonly created: number,
@@ -96,7 +96,6 @@ export interface Project {
 export interface Attachment {
     readonly id: string,
     name: string | null,
-    mimeType: string | null,
     base64Content: string | null,
     visibility: { readonly id: string } | null,
 }

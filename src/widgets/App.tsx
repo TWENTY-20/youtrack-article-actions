@@ -2,18 +2,24 @@ import { useEffect, useState } from "react";
 import { APIError, Article, Project } from "./types.ts";
 import Select from "@jetbrains/ring-ui-built/components/select/select";
 import { useTranslation } from "react-i18next";
-import { copyArticle, loadAndCopyAttachmentsToArticle, loadArticle, loadProjects, moveArticle } from "./api.ts";
+import {
+    copyArticle,
+    copyChildArticle,
+    loadAndCopyAttachmentsToArticle,
+    loadArticle,
+    loadProjects,
+    moveArticle
+} from "./api.ts";
 import Loader from "@jetbrains/ring-ui-built/components/loader/loader";
 import Button from "@jetbrains/ring-ui-built/components/button/button";
 import { Input, Size } from "@jetbrains/ring-ui-built/components/input/input";
 import ButtonSet from "@jetbrains/ring-ui-built/components/button-set/button-set";
-import { host } from "./youTrackApp.ts";
+import YTApp, { host } from "./youTrackApp.ts";
 import i18n from "./i18n.ts";
 import { AlertType } from "@jetbrains/ring-ui-built/components/alert/alert";
 
 //todo: permissions
 //todo: hide widget in draft menu - currently not possible
-//todo: copy child articles
 //todo: change parent article
 export default function App() {
     const { t } = useTranslation();
@@ -26,7 +32,7 @@ export default function App() {
     const [projects, setProjects] = useState<Project[]>();
 
     useEffect(() => {
-        loadArticle().then((res: Article) => {
+        loadArticle(YTApp.entity.id).then((res: Article) => {
             setArticle(res);
         }).catch((err: APIError) => {
             if (err.status === 500) {
@@ -87,7 +93,7 @@ export default function App() {
                                 project: item.model
                             });
                         }}
-                        // selected={toSelectItem(article.project)} Doesn't work as default
+                        // selected={toSelectItem(article.project)} Doesn't work as default todo
                         size={Size.FULL}
                     />
                 </div>
@@ -124,10 +130,33 @@ const toSelectItem = (it: Project) => ({ key: it.id, label: it.name, model: it }
 
 async function handleArticleCopy(article: Article) {
     const newArticleId = await copyArticle(article).then((res) => res.id);
-    const attachmentResults = await loadAndCopyAttachmentsToArticle(article.id, newArticleId);
+
+    await Promise.allSettled([handleAttachments(article.id, newArticleId), copyChildArticles(article, newArticleId)]);
+
+    return newArticleId;
+}
+
+async function handleAttachments(oldArticleId: string, newArticleId: string) {
+    const attachmentResults = await loadAndCopyAttachmentsToArticle(oldArticleId, newArticleId);
     for (const result of attachmentResults) if (result.status === "rejected")
         host.alert(i18n.t("errorCopyAttachment", { "name": result.name }), AlertType.ERROR);
-    return newArticleId;
+}
+
+async function copyChildArticles(parentArticle: Article, newArticleId: string) {
+    if (!parentArticle.hasChildren) return;
+
+    const promises = parentArticle.childArticles.map(async ({ id }) => {
+        try {
+            const article = await loadArticle(id).then((res) => ({ ...res, project: parentArticle.project }));
+            const newId = await copyChildArticle(newArticleId, article).then((res) => res.id);
+
+            await Promise.allSettled([handleAttachments(id, newId), copyChildArticles(article, newId)]);
+        } catch (_) {
+            host.alert(i18n.t("errorCopyArticle"));
+        }
+    });
+
+    await Promise.allSettled(promises);
 }
 
 function redirectToArticle(id: string) {

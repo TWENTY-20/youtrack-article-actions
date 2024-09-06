@@ -1,9 +1,9 @@
-import YTApp, { host } from "./youTrackApp.ts";
+import { host } from "./youTrackApp.ts";
 import { Article, Attachment, Project } from "./types.ts";
 
-export async function loadArticle() {
+export async function loadArticle(articleId: string) {
     return await host.fetchYouTrack(
-        `articles/${YTApp.entity.id}?fields=id,attachments(id),childArticles(id,hasChildren),comments(id),content,hasChildren,idReadable,ordinal,summary,visibility(id)`
+        `articles/${articleId}?fields=id,attachments(id),childArticles(id),comments(id),content,hasChildren,idReadable,ordinal,summary,visibility(id)`
     ) as Article;
 }
 
@@ -15,6 +15,15 @@ export async function copyArticle(article: Article) {
     return await host.fetchYouTrack(`articles?fields=id`, {
         method: "POST",
         body: article
+    }) as Pick<Article, "id">;
+}
+
+export async function copyChildArticle(parentArticleId: string, article: Article) {
+    const newId = await copyArticle(article).then((res) => res.id);
+
+    return await host.fetchYouTrack(`articles/${parentArticleId}/childArticles?fields=id`, {
+        method: "POST",
+        body: { ...article, idReadable: undefined, id: newId }
     }) as Pick<Article, "id">;
 }
 
