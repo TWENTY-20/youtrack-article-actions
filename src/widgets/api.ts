@@ -19,17 +19,17 @@ export async function copyArticle(article: Article) {
 }
 
 export async function loadAndCopyAttachmentsToArticle(oldArticleId: string, newArticleId: string) {
-    const attachments: Attachment[] = await host.fetchYouTrack(`articles/${oldArticleId}/attachments?fields=id,name,author,created,updated,size,extension,charset,mimeType,metaData,draft,removed,base64Content,url,visibility(id),article(id),comment(id)&muteUpdateNotifications=true`);
+    const attachments: Attachment[] = await host.fetchYouTrack(`articles/${oldArticleId}/attachments?fields=id,name,base64Content,visibility(id)&muteUpdateNotifications=true`);
     const attachmentRequests = attachments.map(async (att) => {
-        let fileName = att.name ?? "missing-name"
+        let fileName = att.name ?? "missing-name";
         const formData = new FormData();
         await fetch(att.base64Content ?? "data:;base64")
             .then(res => res.blob()).then((blob) => formData.append(fileName, new File([blob], fileName)));
 
         return await host.fetchYouTrack(`articles/${newArticleId}/attachments?fields=id,name`, {
             method: "POST",
-            headers:{
-                'Content-Type': undefined,
+            headers: {
+                "Content-Type": undefined,
             },
             sendRawBody: true,
 
