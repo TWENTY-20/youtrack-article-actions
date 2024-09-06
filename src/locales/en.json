@@ -9,5 +9,6 @@
   "errorDraft": "Draft Articles can not be copied or moved!",
   "errorGeneral": "Widget could not load Article details!",
   "errorCopyArticle": "Could not copy Article! Please try again...",
+  "errorCopyAttachment": "Could not copy Attachment '{{name}}'! Please try to copy it manually...",
   "errorMoveArticle": "Could not move Article! Please try again..."
 }

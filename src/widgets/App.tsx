@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { APIError, Article, Project } from "./types.ts";
 import Select from "@jetbrains/ring-ui-built/components/select/select";
 import { useTranslation } from "react-i18next";
-import { copyArticle, loadArticle, loadProjects, moveArticle } from "./api.ts";
+import { copyArticle, loadAndCopyAttachmentsToArticle, loadArticle, loadProjects, moveArticle } from "./api.ts";
 import Loader from "@jetbrains/ring-ui-built/components/loader/loader";
 import Button from "@jetbrains/ring-ui-built/components/button/button";
 import { Input, Size } from "@jetbrains/ring-ui-built/components/input/input";
@@ -13,7 +13,6 @@ import { AlertType } from "@jetbrains/ring-ui-built/components/alert/alert";
 
 //todo: permissions
 //todo: hide widget in draft menu - currently not possible
-//todo: copy attachments
 //todo: copy child articles
 //todo: change parent article
 export default function App() {
@@ -125,6 +124,9 @@ const toSelectItem = (it: Project) => ({ key: it.id, label: it.name, model: it }
 
 async function handleArticleCopy(article: Article) {
     const newArticleId = await copyArticle(article).then((res) => res.id);
+    const attachmentResults = await loadAndCopyAttachmentsToArticle(article.id, newArticleId);
+    for (const result of attachmentResults) if (result.status === "rejected")
+        host.alert(i18n.t("errorCopyAttachment", { "name": result.name }), AlertType.ERROR);
     return newArticleId;
 }
 
