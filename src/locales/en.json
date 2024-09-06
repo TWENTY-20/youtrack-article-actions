@@ -4,6 +4,8 @@
   "noOptionsFound": "No options found",
   "titleInputLabel": "Title",
   "projectSelectionLabel": "Project",
+  "includeDescendentsCheckboxLabel": "Include sub-articles",
+  "includeDescendentsInfo": "Condition only for 'Copy' - 'Move' always includes all sub-articles",
   "copyButtonLabel": "Copy",
   "moveButtonLabel": "Move",
   "errorDraft": "Draft Articles can not be copied or moved!",

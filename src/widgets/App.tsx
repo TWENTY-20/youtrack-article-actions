@@ -17,6 +17,8 @@ import ButtonSet from "@jetbrains/ring-ui-built/components/button-set/button-set
 import YTApp, { host } from "./youTrackApp.ts";
 import i18n from "./i18n.ts";
 import { AlertType } from "@jetbrains/ring-ui-built/components/alert/alert";
+import Checkbox from "@jetbrains/ring-ui-built/components/checkbox/checkbox";
+import Tooltip from "@jetbrains/ring-ui-built/components/tooltip/tooltip";
 
 //todo: permissions
 //todo: hide widget in draft menu - currently not possible
@@ -30,6 +32,7 @@ export default function App() {
 
     const [article, setArticle] = useState<Article>();
     const [projects, setProjects] = useState<Project[]>();
+    const [includeDescendents, setIncludeDescendents] = useState<boolean>(true);
 
     useEffect(() => {
         loadArticle(YTApp.entity.id).then((res: Article) => {
@@ -85,7 +88,7 @@ export default function App() {
                         loadingMessage={t("loading")}
                         notFoundMessage={t("noOptionsFound")}
                         onOpen={() => {
-                            if (projects) return
+                            if (projects) return;
                             loadProjects().then(setProjects);
                         }}
                         data={projects?.map(toSelectItem)}
@@ -101,10 +104,21 @@ export default function App() {
                     />
                 </div>
             </div>
+            <div className="ring-form__group pl-4">
+                <Checkbox
+                    id="includeDescendentsCheckbox"
+                    defaultChecked={includeDescendents}
+                    onChange={(event) => setIncludeDescendents(event.target.checked)}
+                />
+                <Tooltip title={t("includeDescendentsInfo")}>
+                    <label htmlFor="includeDescendentsCheckbox"
+                           className="font-bold">{t("includeDescendentsCheckboxLabel")}*</label>
+                </Tooltip>
+            </div>
             <ButtonSet className="ring-form__group">
                 <Button primary loader={buttonsLoading} onClick={() => {
                     setButtonsLoading(true);
-                    handleArticleCopy(article).then((newArticleId) => {
+                    handleArticleCopy(article, includeDescendents).then((newArticleId) => {
                         redirectToArticle(newArticleId);
                     }).catch(() => {
                         host.alert(t("errorCopyArticle"));
@@ -129,10 +143,14 @@ export default function App() {
 
 const toSelectItem = (it: Project) => ({ key: it.id, label: it.name, model: it });
 
-async function handleArticleCopy(article: Article) {
+async function handleArticleCopy(article: Article, includeDescendents: boolean) {
     const newArticleId = await copyArticle(article).then((res) => res.id);
 
-    await Promise.allSettled([handleAttachments(article.id, newArticleId), copyChildArticles(article, newArticleId)]);
+    // noinspection ES6MissingAwait
+    let promises = [handleAttachments(article.id, newArticleId)];
+    if (includeDescendents) promises.push(copyChildArticles(article, newArticleId));
+
+    await Promise.allSettled(promises);
 
     return newArticleId;
 }
