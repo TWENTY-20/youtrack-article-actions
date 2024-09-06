@@ -8,6 +8,8 @@ import Button from "@jetbrains/ring-ui-built/components/button/button";
 import { Input, Size } from "@jetbrains/ring-ui-built/components/input/input";
 import ButtonSet from "@jetbrains/ring-ui-built/components/button-set/button-set";
 import { host } from "./youTrackApp.ts";
+import i18n from "./i18n.ts";
+import { AlertType } from "@jetbrains/ring-ui-built/components/alert/alert";
 
 //todo: permissions
 //todo: hide widget in draft menu - currently not possible
@@ -19,6 +21,8 @@ export default function App() {
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [buttonsLoading, setButtonsLoading] = useState(false);
+
     const [article, setArticle] = useState<Article>();
     const [projects, setProjects] = useState<Project[]>();
 
@@ -90,19 +94,25 @@ export default function App() {
                 </div>
             </div>
             <ButtonSet className="ring-form__group">
-                <Button primary disabled={!article.project} onClick={() => {
+                <Button primary disabled={!article.project} loader={buttonsLoading} onClick={() => {
                     console.log(article);
-                    copyArticle(article).then(() => {
-                        host.alert("Please close the modal and reload!");
-                    });
+                    setButtonsLoading(true);
+                    handleArticleCopy(article).then((newArticleId) => {
+                        redirectToArticle(newArticleId);
+                    }).catch(() => {
+                        host.alert(t("errorCopyArticle"));
+                    }).finally(() => setButtonsLoading(false));
                 }}>
                     {t("copyButtonLabel")}
                 </Button>
-                <Button disabled={!article.project} onClick={() => {
+                <Button disabled={!article.project} loader={buttonsLoading} onClick={() => {
                     console.log(article);
-                    moveArticle(article.idReadable, article.project!).then(() => {
-                        host.alert("Please close the modal and reload!");
-                    });
+                    setButtonsLoading(true);
+                    moveArticle(article.idReadable, article.project!).then(({ id }) => {
+                        redirectToArticle(id);
+                    }).catch(() => {
+                        host.alert(t("errorMoveArticle"));
+                    }).finally(() => setButtonsLoading(true));
                 }}>
                     {t("moveButtonLabel")}
                 </Button>
@@ -113,4 +123,11 @@ export default function App() {
 
 const toSelectItem = (it: Project) => ({ key: it.id, label: it.name, model: it });
 
+async function handleArticleCopy(article: Article) {
+    const newArticleId = await copyArticle(article).then((res) => res.id);
+    return newArticleId;
+}
 
+function redirectToArticle(id: string) {
+    window.parent.location.href = `/articles/${id}`;
+}

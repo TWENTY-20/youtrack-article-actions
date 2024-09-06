@@ -7,5 +7,7 @@
   "copyButtonLabel": "Copy",
   "moveButtonLabel": "Move",
   "errorDraft": "Draft Articles can not be copied or moved!",
-  "errorGeneral": "Widget could not load Article details!"
+  "errorGeneral": "Widget could not load Article details!",
+  "errorCopyArticle": "Could not copy Article! Please try again...",
+  "errorMoveArticle": "Could not move Article! Please try again..."
 }
