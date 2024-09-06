@@ -84,7 +84,10 @@ export default function App() {
                         loading={projects == undefined}
                         loadingMessage={t("loading")}
                         notFoundMessage={t("noOptionsFound")}
-                        onOpen={() => loadProjects().then(setProjects)}
+                        onOpen={() => {
+                            if (projects) return
+                            loadProjects().then(setProjects);
+                        }}
                         data={projects?.map(toSelectItem)}
                         onSelect={(item) => {
                             if (!item) return;
