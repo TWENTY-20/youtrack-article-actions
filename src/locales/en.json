@@ -6,6 +6,7 @@
   "titleInputEmpty": "Can not be empty!",
   "projectSelectionLabel": "Project",
   "parentArticleSelectionLabel": "Parent Article",
+  "topLevelArticlePlaceholder": "Top Level",
   "includeDescendentsCheckboxLabel": "Include sub-articles",
   "includeDescendentsInfo": "Condition only applies for 'Copy' - 'Move' always includes all sub-articles",
   "copyButtonLabel": "Copy",

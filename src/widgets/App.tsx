@@ -22,7 +22,7 @@ import Tooltip from "@jetbrains/ring-ui-built/components/tooltip/tooltip";
 const TOP_LEVEL_ARTICLE: ArticleBase = {
     id: "0",
     idReadable: "",
-    summary: "Top Level" // todo
+    summary: i18n.t("topLevelArticlePlaceholder")
 };
 
 //todo: hide widget in draft menu - currently not possible
