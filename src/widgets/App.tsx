@@ -159,7 +159,7 @@ export default function App() {
                 </Tooltip>
             </div>
 
-            <div className="flex grow space-x-4">
+            <div className="flex grow space-x-4 pt-8">
                 <Button primary className="w-full" loader={buttonsLoading} onClick={() => {
                     setButtonsLoading(true);
 
