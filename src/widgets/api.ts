@@ -7,6 +7,12 @@ export async function loadArticle(articleId: string) {
     ) as Article;
 }
 
+export async function isArticleDraft(articleId: string) {
+    return await host.fetchYouTrack(`users/me/articleDrafts/${articleId}`).then(({ $type }: {
+        $type: string
+    }) => $type === "ArticleDraft").catch(() => false);
+}
+
 export async function loadProjects() {
     return await host.fetchYouTrack(`admin/projects?fields=id,name`) as Project[];
 }

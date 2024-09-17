@@ -3,7 +3,7 @@ import { APIError, Article, ArticleBase, Project } from "./types.ts";
 import Select from "@jetbrains/ring-ui-built/components/select/select";
 import { useTranslation } from "react-i18next";
 import {
-    copyArticle,
+    copyArticle, isArticleDraft,
     loadAndCopyAttachmentsToArticle,
     loadArticle,
     loadProjectArticles,
@@ -40,12 +40,13 @@ export default function App() {
     const [includeDescendents, setIncludeDescendents] = useState<boolean>(true);
 
     useEffect(() => {
-        loadArticle(YTApp.entity.id).then((res: Article) => {
+        const articleId = YTApp.entity.id
+        loadArticle(articleId).then((res: Article) => {
             setArticle(res);
             setSelectedProject(res.project);
             if (res.parentArticle) setSelectedParentArticle(res.parentArticle);
-        }).catch((err: APIError) => {
-            if (err.status === 500) {
+        }).catch(async (err: APIError) => {
+            if (err.status === 500 && await isArticleDraft(articleId)) {
                 setError(t("errorDraft"));
                 return;
             }
