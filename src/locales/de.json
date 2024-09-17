@@ -14,6 +14,8 @@
   "errorDraft": "Entwürfe können nicht kopiert oder verschoben werden!",
   "errorGeneral": "Die Artikeldetails konnten nicht geladen werden!",
   "errorCopyArticle": "Der Artikel konnte nicht kopiert werden! Versuchen Sie es erneut...",
+  "warnCopyErrorsOccurred": "Beim Kopieren sind einige Fehler aufgetreten. Bitte lesen Sie diese und laden Sie die Seite neu",
   "errorCopyAttachment": "Anhang '{{name}}' konnte nicht kopiert werden! Bitte versuchen Sie, es manuell zu kopieren...",
+  "errorCopyChildArticle": "Der Unterartikel '{{id}}' konnte nicht kopiert werden! Versuchen Sie es erneut...",
   "errorMoveArticle": "Der Artikel konnte nicht verschoben werden! Versuchen Sie es erneut..."
 }

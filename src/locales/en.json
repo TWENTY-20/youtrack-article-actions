@@ -14,6 +14,8 @@
   "errorDraft": "Draft Articles can not be copied or moved!",
   "errorGeneral": "Widget could not load Article details!",
   "errorCopyArticle": "Could not copy Article! Please try again...",
+  "warnCopyErrorsOccurred": "Some errors occurred during copying. Please read them and reload the page",
   "errorCopyAttachment": "Could not copy Attachment '{{name}}'! Please try to copy it manually...",
+  "errorCopyChildArticle": "Could not copy Article '{{id}}'! Please try again...",
   "errorMoveArticle": "Could not move Article! Please try again..."
 }

@@ -59,7 +59,6 @@ export default function App() {
         </div>
     );
 
-    //todo: error
     if (!article || !selectedProject) return (
         <div className="w-full flex justify-center mt-12 text-base font-bold text-wrap">
             <span>{error}</span>
@@ -174,10 +173,13 @@ export default function App() {
 
                     const parentArticle = selectedParentArticle === TOP_LEVEL_ARTICLE ? null : selectedParentArticle;
 
-                    handleArticleCopy(article, includeDescendents, parentArticle).then(({ id }) => {
-                        redirectToArticle(id);
+                    handleArticleCopy(article, includeDescendents, parentArticle).then(([article, noErrors]) => {
+                        if (noErrors)
+                            redirectToArticle(article.id);
+                        else
+                            host.alert(t("warnCopyErrorsOccurred"), AlertType.WARNING);
                     }).catch(() => {
-                        host.alert(t("errorCopyArticle"));
+                        host.alert(t("errorCopyArticle"), AlertType.ERROR);
                     }).finally(() => setButtonsLoading(false));
                 }}>
                     {t("copyButtonLabel")}
@@ -199,7 +201,7 @@ export default function App() {
                             moveArticle(article.idReadable, project, parentArticle).then(({ id }) => {
                                 redirectToArticle(id);
                             }).catch(() => {
-                                host.alert(t("errorMoveArticle"));
+                                host.alert(t("errorMoveArticle"), AlertType.ERROR);
                             }).finally(() => setButtonsLoading(false));
                         }}>
                     {t("moveButtonLabel")}
@@ -217,7 +219,7 @@ const articleToSelectItem = (it: ArticleBase) => ({
     model: it
 });
 
-async function handleArticleCopy(article: Article, includeDescendents: boolean, parentArticle: ArticleBase | null) {
+async function handleArticleCopy(article: Article, includeDescendents: boolean, parentArticle: ArticleBase | null): Promise<[ArticleBase, boolean]> {
     article.parentArticle = parentArticle;
     const newArticle = await copyArticle(article);
 
@@ -225,32 +227,45 @@ async function handleArticleCopy(article: Article, includeDescendents: boolean, 
     let promises = [handleAttachments(article.id, newArticle.id)];
     if (includeDescendents) promises.push(copyChildArticles(article, newArticle));
 
-    await Promise.allSettled(promises);
+    const results = await Promise.allSettled(promises);
+    const noErrors = !results.some((result) => result.status === "rejected" || !result.value)
 
-    return newArticle;
+    return [newArticle, noErrors];
 }
 
 async function handleAttachments(oldArticleId: string, newArticleId: string) {
     const attachmentResults = await loadAndCopyAttachmentsToArticle(oldArticleId, newArticleId);
-    for (const result of attachmentResults) if (result.status === "rejected")
-        host.alert(i18n.t("errorCopyAttachment", { "name": result.name }), AlertType.ERROR);
+
+    let anyAttachmentErrored = false;
+
+    for (const result of attachmentResults) {
+        if (result.status === "rejected") {
+            host.alert(i18n.t("errorCopyAttachment", { "name": result.name }), AlertType.ERROR);
+            anyAttachmentErrored = true;
+        }
+    }
+
+    return !anyAttachmentErrored;
 }
 
-async function copyChildArticles(parentArticle: Article, newArticle: ArticleBase) {
-    if (!parentArticle.hasChildren) return;
+async function copyChildArticles(parentArticle: Article, newArticle: ArticleBase): Promise<boolean> {
+    if (!parentArticle.hasChildren) return true;
 
     const promises = parentArticle.childArticles.map(async ({ id }) => {
         try {
             const article = await loadArticle(id).then((res) => ({ ...res, project: parentArticle.project }));
             const newChildArticle = await copyArticle({ ...article, parentArticle: newArticle });
 
-            await Promise.allSettled([handleAttachments(id, newChildArticle.id), copyChildArticles(article, newChildArticle)]);
+            const results = await Promise.allSettled([handleAttachments(id, newChildArticle.id), copyChildArticles(article, newChildArticle)]);
+            return !results.some((result) => result.status === "rejected" || !result.value);
         } catch (_) {
-            host.alert(i18n.t("errorCopyArticle"));
+            host.alert(i18n.t("errorCopyChildArticle", { "id": id }), AlertType.ERROR);
+            return false;
         }
     });
 
-    await Promise.allSettled(promises);
+    const results = await Promise.allSettled(promises);
+    return !results.some((result) => result.status === "rejected" || !result.value);
 }
 
 function redirectToArticle(id: string) {
