@@ -71,13 +71,15 @@ export default function App() {
         || selectedParentArticle.id === article.parentArticle?.id;
 
     return (
-        <form className="w-full flex flex-col space-y-4">
+        <form className="w-full flex flex-col space-y-6">
             <div>
                 <label htmlFor="titleInput">{t("titleInputLabel")}</label>
                 <Input
                     id="titleInput"
                     defaultValue={article.summary ?? ""}
                     size={Size.FULL}
+                    error={!article.summary || article.summary.length === 0 ? t("titleInputEmpty") : undefined}
+                    className={!article.summary || article.summary.length === 0 ? "-mb-5" : ""}
                     onChange={(event) => {
                         setArticle((article) =>
                             article && {
@@ -159,7 +161,7 @@ export default function App() {
                 </Tooltip>
             </div>
 
-            <div className="flex grow space-x-4 pt-8">
+            <div className="flex grow space-x-4 pt-4">
                 <Button primary className="w-full" loader={buttonsLoading} onClick={() => {
                     setButtonsLoading(true);
 

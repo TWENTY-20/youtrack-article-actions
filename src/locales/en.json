@@ -3,6 +3,7 @@
   "filterItems": "Filter items",
   "noOptionsFound": "No options found",
   "titleInputLabel": "Title",
+  "titleInputEmpty": "Can not be empty!",
   "projectSelectionLabel": "Project",
   "parentArticleSelectionLabel": "Parent Article",
   "includeDescendentsCheckboxLabel": "Include sub-articles",

@@ -13,7 +13,7 @@
       "extensionPoint": "ARTICLE_OPTIONS_MENU_ITEM",
       "expectedDimensions": {
         "width": 360,
-        "height": 320
+        "height": 330
       }
     }
   ]
