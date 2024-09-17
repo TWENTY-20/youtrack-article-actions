@@ -25,7 +25,6 @@ const TOP_LEVEL_ARTICLE: ArticleBase = {
     summary: "Top Level" // todo
 };
 
-//todo: permissions
 //todo: hide widget in draft menu - currently not possible
 export default function App() {
     const { t } = useTranslation();
@@ -67,6 +66,10 @@ export default function App() {
         </div>
     );
 
+    const moveButtonDisabled =
+        selectedParentArticle === TOP_LEVEL_ARTICLE && article.parentArticle === null && selectedProject?.id === article.project.id
+        || selectedParentArticle.id === article.parentArticle?.id;
+
     return (
         <form className="w-full flex flex-col space-y-4">
             <div>
@@ -101,7 +104,7 @@ export default function App() {
                     onSelect={(item) => {
                         if (!item) return;
                         setSelectedProject(item.model);
-                        setSelectedParentArticle(TOP_LEVEL_ARTICLE)
+                        setSelectedParentArticle(TOP_LEVEL_ARTICLE);
                     }}
                     selected={projectToSelectItem(selectedProject!)}
                     size={Size.FULL}
@@ -179,11 +182,8 @@ export default function App() {
                 </Button>
                 <Button primary
                         className="w-full"
-                        loader={buttonsLoading}
-                        disabled={
-                            selectedParentArticle === TOP_LEVEL_ARTICLE && article.parentArticle === null && selectedProject?.id === article.project.id
-                            || selectedParentArticle.id === article.parentArticle?.id
-                        }
+                        loader={!moveButtonDisabled && buttonsLoading}
+                        disabled={moveButtonDisabled}
                         onClick={() => {
                             setButtonsLoading(true);
 
@@ -192,7 +192,7 @@ export default function App() {
                             const project = {
                                 id: selectedProject.id,
                                 name: selectedProject.name
-                            }
+                            };
 
                             moveArticle(article.idReadable, project, parentArticle).then(({ id }) => {
                                 redirectToArticle(id);
