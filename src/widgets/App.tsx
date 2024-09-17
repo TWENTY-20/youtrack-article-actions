@@ -1,28 +1,32 @@
 import { useEffect, useState } from "react";
-import { APIError, Article, Project } from "./types.ts";
+import { APIError, Article, ArticleBase, Project } from "./types.ts";
 import Select from "@jetbrains/ring-ui-built/components/select/select";
 import { useTranslation } from "react-i18next";
 import {
     copyArticle,
-    copyChildArticle,
     loadAndCopyAttachmentsToArticle,
     loadArticle,
+    loadProjectArticles,
     loadProjects,
     moveArticle
 } from "./api.ts";
 import Loader from "@jetbrains/ring-ui-built/components/loader/loader";
 import Button from "@jetbrains/ring-ui-built/components/button/button";
 import { Input, Size } from "@jetbrains/ring-ui-built/components/input/input";
-import ButtonSet from "@jetbrains/ring-ui-built/components/button-set/button-set";
 import YTApp, { host } from "./youTrackApp.ts";
 import i18n from "./i18n.ts";
 import { AlertType } from "@jetbrains/ring-ui-built/components/alert/alert";
 import Checkbox from "@jetbrains/ring-ui-built/components/checkbox/checkbox";
 import Tooltip from "@jetbrains/ring-ui-built/components/tooltip/tooltip";
 
+const TOP_LEVEL_ARTICLE: ArticleBase = {
+    id: "0",
+    idReadable: "",
+    summary: "Top Level" // todo
+};
+
 //todo: permissions
 //todo: hide widget in draft menu - currently not possible
-//todo: change parent article
 export default function App() {
     const { t } = useTranslation();
 
@@ -32,11 +36,15 @@ export default function App() {
 
     const [article, setArticle] = useState<Article>();
     const [projects, setProjects] = useState<Project[]>();
+    const [selectedProject, setSelectedProject] = useState<Project>();
+    const [selectedParentArticle, setSelectedParentArticle] = useState<ArticleBase>(TOP_LEVEL_ARTICLE);
     const [includeDescendents, setIncludeDescendents] = useState<boolean>(true);
 
     useEffect(() => {
         loadArticle(YTApp.entity.id).then((res: Article) => {
             setArticle(res);
+            setSelectedProject(res.project);
+            if (res.parentArticle) setSelectedParentArticle(res.parentArticle);
         }).catch((err: APIError) => {
             if (err.status === 500) {
                 setError(t("errorDraft"));
@@ -53,106 +61,171 @@ export default function App() {
     );
 
     //todo: error
-    if (!article) return (
+    if (!article || !selectedProject) return (
         <div className="w-full flex justify-center mt-12 text-base font-bold text-wrap">
             <span>{error}</span>
         </div>
     );
 
     return (
-        <form className="w-full flex flex-col ring-form">
-            <div className="ring-form__group">
-                <label htmlFor="titleInput" className="ring-form__label">{t("titleInputLabel")}</label>
-                <div className="ring-form__control">
-                    <Input
-                        id="titleInput"
-                        defaultValue={article.summary ?? ""}
-                        size={Size.FULL}
-                        onChange={(event) => {
-                            setArticle((article) =>
-                                article && {
-                                    ...article,
-                                    summary: event.currentTarget.value
-                                });
-                        }}
-                    />
-                </div>
+        <form className="w-full flex flex-col space-y-4">
+            <div>
+                <label htmlFor="titleInput">{t("titleInputLabel")}</label>
+                <Input
+                    id="titleInput"
+                    defaultValue={article.summary ?? ""}
+                    size={Size.FULL}
+                    onChange={(event) => {
+                        setArticle((article) =>
+                            article && {
+                                ...article,
+                                summary: event.currentTarget.value
+                            });
+                    }}
+                />
             </div>
-            <div className="ring-form__group">
-                <label htmlFor="projectSelection" className="ring-form__label">{t("projectSelectionLabel")}</label>
-                <div className="ring-form__control">
+
+            <div>
+                <label htmlFor="projectSelection">{t("projectSelectionLabel")}</label>
+                <Select
+                    id="projectSelection"
+                    filter={{ placeholder: t("filterItems") }}
+                    loading={projects == undefined}
+                    loadingMessage={t("loading")}
+                    notFoundMessage={t("noOptionsFound")}
+                    onOpen={() => {
+                        if (projects) return;
+                        loadProjects().then(setProjects);
+                    }}
+                    data={projects?.map(projectToSelectItem)}
+                    onSelect={(item) => {
+                        if (!item) return;
+                        setSelectedProject(item.model);
+                        setSelectedParentArticle(TOP_LEVEL_ARTICLE)
+                    }}
+                    selected={projectToSelectItem(selectedProject!)}
+                    size={Size.FULL}
+                />
+            </div>
+
+            {
+                selectedProject &&
+                <div>
+                    <label htmlFor="parentArticleSelection">{t("parentArticleSelectionLabel")}</label>
                     <Select
-                        id="projectSelection"
+                        id="parentArticleSelection"
                         filter={{ placeholder: t("filterItems") }}
-                        loading={projects == undefined}
+                        loading={selectedProject.articles == undefined}
                         loadingMessage={t("loading")}
                         notFoundMessage={t("noOptionsFound")}
                         onOpen={() => {
-                            if (projects) return;
-                            loadProjects().then(setProjects);
-                        }}
-                        data={projects?.map(toSelectItem)}
-                        onSelect={(item) => {
-                            if (!item) return;
-                            setArticle({
-                                ...article,
-                                project: item.model
+                            if (selectedProject.articles) return;
+                            loadProjectArticles(selectedProject.id).then((res: ArticleBase[]) => {
+                                selectedProject.articles = [TOP_LEVEL_ARTICLE, ...res];
+                                setSelectedProject({ ...selectedProject });
+
+                                // Memoize the articles
+                                if (!projects) return;
+                                const index = projects.findIndex((proj) => proj.id === selectedProject.id);
+                                projects[index] = selectedProject;
+                                setProjects(projects);
+                            }).catch(() => {
+                                selectedProject.articles = [TOP_LEVEL_ARTICLE];
+                                setSelectedProject({ ...selectedProject });
                             });
                         }}
-                        selected={toSelectItem(article.project)}
+                        data={selectedProject.articles?.map(articleToSelectItem)}
+                        onSelect={(item) => {
+                            if (!item) return;
+                            setSelectedParentArticle(item.model);
+                        }}
+                        selected={articleToSelectItem(selectedParentArticle)}
                         size={Size.FULL}
                     />
                 </div>
-            </div>
-            <div className="ring-form__group pl-4">
+            }
+
+            <div>
                 <Checkbox
                     id="includeDescendentsCheckbox"
                     defaultChecked={includeDescendents}
                     onChange={(event) => setIncludeDescendents(event.target.checked)}
                 />
                 <Tooltip title={t("includeDescendentsInfo")}>
-                    <label htmlFor="includeDescendentsCheckbox"
-                           className="font-bold">{t("includeDescendentsCheckboxLabel")}*</label>
+                    <label htmlFor="includeDescendentsCheckbox">{t("includeDescendentsCheckboxLabel")}*</label>
                 </Tooltip>
             </div>
-            <ButtonSet className="ring-form__group">
-                <Button primary loader={buttonsLoading} onClick={() => {
+
+            <div className="flex grow space-x-4">
+                <Button primary className="w-full" loader={buttonsLoading} onClick={() => {
                     setButtonsLoading(true);
-                    handleArticleCopy(article, includeDescendents).then((newArticleId) => {
-                        redirectToArticle(newArticleId);
+
+                    if (!article || !selectedProject) return;
+
+                    article.project = {
+                        id: selectedProject.id,
+                        name: selectedProject.name
+                    };
+
+                    const parentArticle = selectedParentArticle === TOP_LEVEL_ARTICLE ? null : selectedParentArticle;
+
+                    handleArticleCopy(article, includeDescendents, parentArticle).then(({ id }) => {
+                        redirectToArticle(id);
                     }).catch(() => {
                         host.alert(t("errorCopyArticle"));
                     }).finally(() => setButtonsLoading(false));
                 }}>
                     {t("copyButtonLabel")}
                 </Button>
-                <Button loader={buttonsLoading} onClick={() => {
-                    setButtonsLoading(true);
-                    moveArticle(article.idReadable, article.project).then(({ id }) => {
-                        redirectToArticle(id);
-                    }).catch(() => {
-                        host.alert(t("errorMoveArticle"));
-                    }).finally(() => setButtonsLoading(true));
-                }}>
+                <Button primary
+                        className="w-full"
+                        loader={buttonsLoading}
+                        disabled={
+                            selectedParentArticle === TOP_LEVEL_ARTICLE && article.parentArticle === null && selectedProject?.id === article.project.id
+                            || selectedParentArticle.id === article.parentArticle?.id
+                        }
+                        onClick={() => {
+                            setButtonsLoading(true);
+
+                            const parentArticle = selectedParentArticle === TOP_LEVEL_ARTICLE ? undefined : selectedParentArticle;
+
+                            const project = {
+                                id: selectedProject.id,
+                                name: selectedProject.name
+                            }
+
+                            moveArticle(article.idReadable, project, parentArticle).then(({ id }) => {
+                                redirectToArticle(id);
+                            }).catch(() => {
+                                host.alert(t("errorMoveArticle"));
+                            }).finally(() => setButtonsLoading(false));
+                        }}>
                     {t("moveButtonLabel")}
                 </Button>
-            </ButtonSet>
+            </div>
         </form>
     );
 }
 
-const toSelectItem = (it: Project) => ({ key: it.id, label: it.name, model: it });
+const projectToSelectItem = (it: Project) => ({ key: it.id, label: it.name, model: it });
+const articleToSelectItem = (it: ArticleBase) => ({
+    key: it.id,
+    label: it.summary,
+    description: it.idReadable,
+    model: it
+});
 
-async function handleArticleCopy(article: Article, includeDescendents: boolean) {
-    const newArticleId = await copyArticle(article).then((res) => res.id);
+async function handleArticleCopy(article: Article, includeDescendents: boolean, parentArticle: ArticleBase | null) {
+    article.parentArticle = parentArticle;
+    const newArticle = await copyArticle(article);
 
     // noinspection ES6MissingAwait
-    let promises = [handleAttachments(article.id, newArticleId)];
-    if (includeDescendents) promises.push(copyChildArticles(article, newArticleId));
+    let promises = [handleAttachments(article.id, newArticle.id)];
+    if (includeDescendents) promises.push(copyChildArticles(article, newArticle));
 
     await Promise.allSettled(promises);
 
-    return newArticleId;
+    return newArticle;
 }
 
 async function handleAttachments(oldArticleId: string, newArticleId: string) {
@@ -161,15 +234,15 @@ async function handleAttachments(oldArticleId: string, newArticleId: string) {
         host.alert(i18n.t("errorCopyAttachment", { "name": result.name }), AlertType.ERROR);
 }
 
-async function copyChildArticles(parentArticle: Article, newArticleId: string) {
+async function copyChildArticles(parentArticle: Article, newArticle: ArticleBase) {
     if (!parentArticle.hasChildren) return;
 
     const promises = parentArticle.childArticles.map(async ({ id }) => {
         try {
             const article = await loadArticle(id).then((res) => ({ ...res, project: parentArticle.project }));
-            const newId = await copyChildArticle(newArticleId, article).then((res) => res.id);
+            const newChildArticle = await copyArticle({ ...article, parentArticle: newArticle });
 
-            await Promise.allSettled([handleAttachments(id, newId), copyChildArticles(article, newId)]);
+            await Promise.allSettled([handleAttachments(id, newChildArticle.id), copyChildArticles(article, newChildArticle)]);
         } catch (_) {
             host.alert(i18n.t("errorCopyArticle"));
         }

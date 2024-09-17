@@ -4,6 +4,7 @@
   "noOptionsFound": "No options found",
   "titleInputLabel": "Title",
   "projectSelectionLabel": "Project",
+  "parentArticleSelectionLabel": "Parent Article",
   "includeDescendentsCheckboxLabel": "Include sub-articles",
   "includeDescendentsInfo": "Condition only for 'Copy' - 'Move' always includes all sub-articles",
   "copyButtonLabel": "Copy",

@@ -70,19 +70,23 @@ export interface APIError {
     status: number
 }
 
-export interface Article {
+export interface ArticleBase {
     readonly id: string,
+    readonly idReadable: string,
+    summary: string | null,
+}
+
+export interface Article extends ArticleBase {
     readonly attachments: Array<Pick<Attachment, "id">>,
     readonly childArticles: Array<Pick<Article, "id">>,
-    readonly comments: Array<{ readonly id: string }>
+    readonly comments: Array<{ readonly id: string }>,
     content: string | null,
     // readonly created: number,
     readonly hasChildren: boolean,
-    readonly idReadable: string,
-    readonly ordinal: number,
+    // readonly ordinal: number,
+    parentArticle: ArticleBase | null,
     project: Project,
     // readonly reporter: { readonly id: string } | null,
-    summary: string | null,
     // readonly updated: number,
     // readonly updatedBy: { readonly id: string } | null,
     visibility: { readonly id: string } | null,
@@ -91,6 +95,7 @@ export interface Article {
 export interface Project {
     readonly id: string,
     readonly name: string,
+    articles?: Array<ArticleBase>,
 }
 
 export interface Attachment {

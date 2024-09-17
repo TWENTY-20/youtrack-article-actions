@@ -1,9 +1,9 @@
 import { host } from "./youTrackApp.ts";
-import { Article, Attachment, Project } from "./types.ts";
+import { Article, ArticleBase, Attachment, Project } from "./types.ts";
 
 export async function loadArticle(articleId: string) {
     return await host.fetchYouTrack(
-        `articles/${articleId}?fields=id,project(id,name),attachments(id),childArticles(id),comments(id),content,hasChildren,idReadable,ordinal,summary,visibility(id)`
+        `articles/${articleId}?fields=id,project(id,name),attachments(id),childArticles(id),comments(id),content,hasChildren,idReadable,parentArticle(id,summary),summary,visibility(id)`
     ) as Article;
 }
 
@@ -11,20 +11,15 @@ export async function loadProjects() {
     return await host.fetchYouTrack(`admin/projects?fields=id,name`) as Project[];
 }
 
-export async function copyArticle(article: Article) {
-    return await host.fetchYouTrack(`articles?fields=id`, {
-        method: "POST",
-        body: article
-    }) as Pick<Article, "id">;
+export async function loadProjectArticles(projectId: string) {
+    return await host.fetchYouTrack(`admin/projects/${projectId}/articles?fields=id,idReadable,summary`) as ArticleBase[];
 }
 
-export async function copyChildArticle(parentArticleId: string, article: Article) {
-    const newId = await copyArticle(article).then((res) => res.id);
-
-    return await host.fetchYouTrack(`articles/${parentArticleId}/childArticles?fields=id`, {
+export async function copyArticle(article: Article) {
+    return await host.fetchYouTrack(`articles?fields=id,idReadable,summary`, {
         method: "POST",
-        body: { ...article, idReadable: undefined, id: newId }
-    }) as Pick<Article, "id">;
+        body: article
+    }) as ArticleBase;
 }
 
 export async function loadAndCopyAttachmentsToArticle(oldArticleId: string, newArticleId: string) {
@@ -53,12 +48,12 @@ export async function loadAndCopyAttachmentsToArticle(oldArticleId: string, newA
     }));
 }
 
-export async function moveArticle(idReadable: string, project: Project, parentArticle?: Pick<Article, "idReadable">) {
-    return await host.fetchYouTrack(`articles/${idReadable}?fields=id`, {
+export async function moveArticle(idReadable: string, project: Project, parentArticle?: ArticleBase) {
+    return await host.fetchYouTrack(`articles/${idReadable}?fields=id,idReadable,summary`, {
         method: "POST",
         body: {
             parentArticle: parentArticle ?? null,
             project: project
         }
-    }) as Pick<Article, "id">;
+    }) as ArticleBase;
 }
