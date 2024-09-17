@@ -1,10 +1,11 @@
 {
+  "$schema": "https://json.schemastore.org/youtrack-app.json",
   "name": "youtrack-article-actions",
   "title": "YouTrack Article Actions",
   "description": "Copy or move an article in the Knowledge Base",
   "version": "1.0.0",
-  "icon": "icons/copy.svg",
-  "minYouTrackVersion": "2024.2",
+  "icon": "icons.svg",
+  "minYouTrackVersion": "2024.3.0",
   "widgets": [
     {
       "key": "article-menu-demo",
