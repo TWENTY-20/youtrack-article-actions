@@ -1,8 +1,11 @@
 # YouTrack Article Actions
 
-Once installed into [JetBrains YouTrack](https://www.jetbrains.com/youtrack/), this App utilizes available extension
-points for sprint planning.
+Once installed into [JetBrains YouTrack](https://www.jetbrains.com/youtrack/), this App allows YouTrack users to copy or move articles in the Knowledge Base.
 
+Articles can be renamed, and users can choose in which project and under which other article the current should be placed.
+When copying users can also choose to include or exclude sub-articles.
+
+While moving is completely lossless, copying will result in the loss of the edit history and comments due to technical details.
 ### Installation
 
 1. `npm install`
