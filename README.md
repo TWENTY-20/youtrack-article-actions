@@ -25,3 +25,7 @@ While moving is completely lossless, copying will result in the loss of the edit
    token, granted on `%YOUTRACK_URL%/youtrack/users/me?tab=account-security`
 2. Attach to desired projects, as described above
 3. Apply changes to sources and repeat p.2 
+
+
+### Attribution
+This project includes an icon licensed under the Apache License 2.0, available at https://github.com/JetBrains/icons.
