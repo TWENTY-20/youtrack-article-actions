@@ -1,0 +1,19 @@
+{
+  "loading": "Laden...",
+  "filterItems": "Elemente filtern",
+  "noOptionsFound": "Keine Optionen gefunden",
+  "titleInputLabel": "Titel",
+  "titleInputEmpty": "Kann nicht leer sein!",
+  "projectSelectionLabel": "Projekt",
+  "parentArticleSelectionLabel": "Übergeordneter Artikel",
+  "topLevelArticlePlaceholder": "Höchste Ebene",
+  "includeDescendentsCheckboxLabel": "Unterartikel einschließen",
+  "includeDescendentsInfo": "Bedingung gilt nur für „Kopieren“ - „Verschieben“ umfasst immer alle Unterartikel",
+  "copyButtonLabel": "Kopieren",
+  "moveButtonLabel": "Verschieben",
+  "errorDraft": "Entwürfe können nicht kopiert oder verschoben werden!",
+  "errorGeneral": "Die Artikeldetails konnten nicht geladen werden!",
+  "errorCopyArticle": "Der Artikel konnte nicht kopiert werden! Versuchen Sie es erneut...",
+  "errorCopyAttachment": "Anhang '{{name}}' konnte nicht kopiert werden! Bitte versuchen Sie, es manuell zu kopieren...",
+  "errorMoveArticle": "Der Artikel konnte nicht verschoben werden! Versuchen Sie es erneut..."
+}
