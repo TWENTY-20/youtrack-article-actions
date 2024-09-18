@@ -4,7 +4,7 @@
   "title": "YouTrack Article Actions",
   "description": "Copy or move an article in the Knowledge Base",
   "version": "1.0.0",
-  "icon": "icons.svg",
+  "icon": "logo.svg",
   "minYouTrackVersion": "2024.3.0",
   "widgets": [
     {
