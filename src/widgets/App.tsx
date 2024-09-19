@@ -3,7 +3,8 @@ import { APIError, Article, ArticleBase, Project } from "./types.ts";
 import Select from "@jetbrains/ring-ui-built/components/select/select";
 import { useTranslation } from "react-i18next";
 import {
-    copyArticle, isArticleDraft,
+    copyArticle,
+    isArticleDraft,
     loadAndCopyAttachmentsToArticle,
     loadArticle,
     loadProjectArticles,
@@ -40,7 +41,7 @@ export default function App() {
     const [includeDescendents, setIncludeDescendents] = useState<boolean>(true);
 
     useEffect(() => {
-        const articleId = YTApp.entity.id
+        const articleId = YTApp.entity.id;
         loadArticle(articleId).then((res: Article) => {
             setArticle(res);
             setSelectedProject(res.project);
@@ -157,7 +158,7 @@ export default function App() {
                     onChange={(event) => setIncludeDescendents(event.target.checked)}
                 />
                 <Tooltip title={t("includeDescendentsInfo")}>
-                    <label htmlFor="includeDescendentsCheckbox">{t("includeDescendentsCheckboxLabel")}*</label>
+                    <label htmlFor="includeDescendentsCheckbox">{t("includeDescendentsCheckboxLabel")} *</label>
                 </Tooltip>
             </div>
 
@@ -179,8 +180,11 @@ export default function App() {
                             redirectToArticle(article.id);
                         else
                             host.alert(t("warnCopyErrorsOccurred"), AlertType.WARNING);
-                    }).catch(() => {
-                        host.alert(t("errorCopyArticle"), AlertType.ERROR);
+                    }).catch((err: APIError) => {
+                        if (err.status === 403)
+                            host.alert(t("errorMissingPermission"));
+                        else
+                            host.alert(t("errorCopyArticle"), AlertType.ERROR);
                     }).finally(() => setButtonsLoading(false));
                 }}>
                     {t("copyButtonLabel")}
@@ -201,8 +205,11 @@ export default function App() {
 
                             moveArticle(article.idReadable, project, parentArticle).then(({ id }) => {
                                 redirectToArticle(id);
-                            }).catch(() => {
-                                host.alert(t("errorMoveArticle"), AlertType.ERROR);
+                            }).catch((err: APIError) => {
+                                if (err.status === 403)
+                                    host.alert(t("errorMissingPermission"));
+                                else
+                                    host.alert(t("errorMoveArticle"), AlertType.ERROR);
                             }).finally(() => setButtonsLoading(false));
                         }}>
                     {t("moveButtonLabel")}
@@ -229,7 +236,7 @@ async function handleArticleCopy(article: Article, includeDescendents: boolean, 
     if (includeDescendents) promises.push(copyChildArticles(article, newArticle));
 
     const results = await Promise.allSettled(promises);
-    const noErrors = !results.some((result) => result.status === "rejected" || !result.value)
+    const noErrors = !results.some((result) => result.status === "rejected" || !result.value);
 
     return [newArticle, noErrors];
 }

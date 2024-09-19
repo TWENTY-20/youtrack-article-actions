@@ -4,18 +4,19 @@
   "title": "YouTrack Article Actions",
   "description": "Copy or move an article in the Knowledge Base",
   "version": "1.0.0",
-  "icon": "logo.svg",
+  "icon": "icons/logo.svg",
   "minYouTrackVersion": "2024.3.0",
   "widgets": [
     {
       "key": "article-menu-demo",
-      "name": "Copy Or Move",
+      "name": "Copy or Move",
       "indexPath": "index.html",
       "extensionPoint": "ARTICLE_OPTIONS_MENU_ITEM",
       "expectedDimensions": {
         "width": 360,
         "height": 330
-      }
+      },
+      "permissions": ["CREATE_ARTICLE", "UPDATE_ARTICLE"]
     }
   ]
 }

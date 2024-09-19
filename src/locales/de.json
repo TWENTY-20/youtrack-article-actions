@@ -13,6 +13,7 @@
   "moveButtonLabel": "Verschieben",
   "errorDraft": "Entwürfe können nicht kopiert oder verschoben werden!",
   "errorGeneral": "Die Artikeldetails konnten nicht geladen werden!",
+  "errorMissingPermissions": "Ihnen fehlen Berechtigungen!",
   "errorCopyArticle": "Der Artikel konnte nicht kopiert werden! Versuchen Sie es erneut...",
   "warnCopyErrorsOccurred": "Beim Kopieren sind einige Fehler aufgetreten. Bitte lesen Sie diese und laden Sie die Seite neu",
   "errorCopyAttachment": "Anhang '{{name}}' konnte nicht kopiert werden! Bitte versuchen Sie, es manuell zu kopieren...",

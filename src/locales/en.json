@@ -13,6 +13,7 @@
   "moveButtonLabel": "Move",
   "errorDraft": "Draft Articles can not be copied or moved!",
   "errorGeneral": "Widget could not load Article details!",
+  "errorMissingPermissions": "You are missing permissions!",
   "errorCopyArticle": "Could not copy Article! Please try again...",
   "warnCopyErrorsOccurred": "Some errors occurred during copying. Please read them and reload the page",
   "errorCopyAttachment": "Could not copy Attachment '{{name}}'! Please try to copy it manually...",
