@@ -26,7 +26,7 @@ export default defineConfig(({ mode }) => {
         root: "src/widgets",
         plugins: [react(), viteStaticCopy({
             targets: [
-                { src: "../../src/icons", dest: ".." },
+                { src: "../../src/icons/*.*", dest: ".." },
                 { src: "../../src/manifest.json", dest: ".." },
                 { src: "../../src/settings.json", dest: ".." },
             ]
