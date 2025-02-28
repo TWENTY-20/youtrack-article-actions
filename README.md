@@ -1,4 +1,4 @@
-# YouTrack Article Actions
+# <img src="/src/icons/logo.svg" alt="" width="35" /> YouTrack Article Actions
 
 Once installed into [JetBrains YouTrack](https://www.jetbrains.com/youtrack/), this App allows YouTrack users to copy or move articles in the Knowledge Base.
 
@@ -6,6 +6,24 @@ Articles can be renamed, and users can choose in which project and under which o
 When copying users can also choose to include or exclude sub-articles.
 
 While moving is completely lossless, copying will result in the loss of the edit history and comments due to technical details.
+
+---
+
+## twenty20 | YouTrack Apps and Extensions
+
+
+We specialize in developing custom YouTrack apps and extensions tailored specifically to your needs.
+
+With our expertise and close collaboration with **JetBrains**, we ensure seamless integration and functionality.
+
+👉 Visit our **[Website](https://twenty20.de/)** for more information and to explore our services.
+
+👉 Looking for other extensions?  
+Check out our offerings in the **[JetBrains Marketplace](https://plugins.jetbrains.com/vendor/twenty20)**.
+
+---
+
+
 ### Installation
 
 1. `npm install`
