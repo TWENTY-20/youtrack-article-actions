@@ -6,7 +6,7 @@ points for sprint planning.
 ### Installation
 
 1. `npm install`
-2. `npm build`
+2. `npm run build`
 
 #### Manual way
 

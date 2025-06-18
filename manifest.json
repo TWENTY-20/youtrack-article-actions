@@ -4,14 +4,18 @@
   "title": "YouTrack App Example",
   "description": "Example description",
   "version": "1.0.0",
-  "icon": "logo.svg",
-  "minYouTrackVersion": "2024.3.0",
+  "vendor": {
+    "name": "twenty20",
+    "url": "https://twenty20.de"
+  },
+  "icon": "icon.svg",
+  "minYouTrackVersion": "2025.1.0",
   "widgets": [
     {
-      "key": "article-menu-demo",
+      "key": "issue-menu-demo",
       "name": "Demo item",
-      "indexPath": "index.html",
-      "extensionPoint": "ARTICLE_OPTIONS_MENU_ITEM",
+      "indexPath": "issue-menu-demo/index.html",
+      "extensionPoint": "ISSUE_OPTIONS_MENU_ITEM",
       "expectedDimensions": {
         "height": 400,
         "width": 400
