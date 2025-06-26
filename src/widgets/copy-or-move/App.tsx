@@ -256,15 +256,22 @@ async function handleAttachments(oldArticleId: string, newArticleId: string) {
     return !anyAttachmentErrored;
 }
 
-async function copyChildArticles(parentArticle: Article, newArticle: ArticleBase): Promise<boolean> {
+async function copyChildArticles(parentArticle: Article, newArticle: ArticleBase, visitedArticleIDs: Array<string> = []): Promise<boolean> {
     if (!parentArticle.hasChildren) return true;
 
     const promises = parentArticle.childArticles.map(async ({ id }) => {
         try {
+            if (visitedArticleIDs.includes(id)) return true;
+
             const article = await loadArticle(id).then((res) => ({ ...res, project: parentArticle.project }));
             const newChildArticle = await copyArticle({ ...article, parentArticle: newArticle });
 
-            const results = await Promise.allSettled([handleAttachments(id, newChildArticle.id), copyChildArticles(article, newChildArticle)]);
+            const results = await Promise.allSettled(
+                [
+                    handleAttachments(id, newChildArticle.id),
+                    copyChildArticles(article, newChildArticle, visitedArticleIDs.concat(newArticle.id))
+                ]
+            );
             return !results.some((result) => result.status === "rejected" || !result.value);
         } catch (_) {
             host.alert(i18n.t("errorCopyChildArticle", { "id": id }), AlertType.ERROR);
