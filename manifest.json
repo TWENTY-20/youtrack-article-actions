@@ -5,13 +5,17 @@
   "description": "Copy or move an article in the Knowledge Base",
   "changeNotes": "See https://plugins.jetbrains.com/plugin/25371-youtrack-article-actions/release-notes",
   "version": "1.0.5",
+  "vendor": {
+    "name": "twenty20",
+    "url": "https://twenty20.de"
+  },
   "icon": "icon.png",
-  "minYouTrackVersion": "2024.3.0",
+  "minYouTrackVersion": "2025.1.0",
   "widgets": [
     {
       "key": "article-menu-demo",
       "name": "Copy or Move",
-      "indexPath": "index.html",
+      "indexPath": "copy-or-move/index.html",
       "extensionPoint": "ARTICLE_OPTIONS_MENU_ITEM",
       "expectedDimensions": {
         "width": 360,

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { APIError, Article, ArticleBase, Project } from "./types.ts";
+import { APIError, Article, ArticleBase, Project } from "../../lib/types.ts";
 import Select from "@jetbrains/ring-ui-built/components/select/select";
 import { useTranslation } from "react-i18next";
 import {
@@ -10,12 +10,12 @@ import {
     loadProjectArticles,
     loadProjects,
     moveArticle
-} from "./api.ts";
+} from "../../lib/api.ts";
 import Loader from "@jetbrains/ring-ui-built/components/loader/loader";
 import Button from "@jetbrains/ring-ui-built/components/button/button";
 import { Input, Size } from "@jetbrains/ring-ui-built/components/input/input";
-import YTApp, { host } from "./youTrackApp.ts";
-import i18n from "./i18n.ts";
+import YTApp, { host } from "../../lib/youTrackApp.ts";
+import i18n from "../../lib/i18n.ts";
 import { AlertType } from "@jetbrains/ring-ui-built/components/alert/alert";
 import Checkbox from "@jetbrains/ring-ui-built/components/checkbox/checkbox";
 import Tooltip from "@jetbrains/ring-ui-built/components/tooltip/tooltip";
@@ -41,7 +41,7 @@ export default function App() {
     const [includeDescendents, setIncludeDescendents] = useState<boolean>(true);
 
     useEffect(() => {
-        const articleId = YTApp.entity.id;
+        const articleId = YTApp.entity!.id;
         loadArticle(articleId).then((res: Article) => {
             setArticle(res);
             setSelectedProject(res.project);
@@ -72,7 +72,7 @@ export default function App() {
         || selectedParentArticle.id === article.parentArticle?.id;
 
     return (
-        <form className="w-full flex flex-col space-y-6">
+        <form className="w-full flex flex-col gap-y-6">
             <div>
                 <label htmlFor="titleInput">{t("titleInputLabel")}</label>
                 <Input
@@ -162,7 +162,7 @@ export default function App() {
                 </Tooltip>
             </div>
 
-            <div className="flex grow space-x-4 pt-4">
+            <div className="flex grow gap-x-4 pt-4">
                 <Button primary className="w-full" loader={buttonsLoading} onClick={() => {
                     setButtonsLoading(true);
 

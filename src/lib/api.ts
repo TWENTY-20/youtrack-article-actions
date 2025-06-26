@@ -8,9 +8,9 @@ export async function loadArticle(articleId: string) {
 }
 
 export async function isArticleDraft(articleId: string) {
-    return await host.fetchYouTrack(`users/me/articleDrafts/${articleId}`).then(({ $type }: {
+    return await host.fetchYouTrack<{
         $type: string
-    }) => $type === "ArticleDraft").catch(() => false);
+    }>(`users/me/articleDrafts/${articleId}`).then(({ $type }) => $type === "ArticleDraft").catch(() => false);
 }
 
 export async function loadProjects() {

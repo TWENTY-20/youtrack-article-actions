@@ -1,54 +1,66 @@
+import { resolve } from "node:path";
 import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
 import { viteStaticCopy } from "vite-plugin-static-copy";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 
-// https://vitejs.dev/config/
+/*
+      See https://vitejs.dev/config/
+*/
+
 export default defineConfig(({ mode }) => {
-    if (mode === "backend") {
+    if (mode === "workflows") {
         return {
+            plugins: [],
             build: {
                 lib: {
-                    entry: "./src/backend.ts",
-                    name: "backend",
-                    fileName: "backend.ts"
+                    entry: [
+                        "./src/workflows/translations.ts",
+                    ],
+                    formats: ["cjs"],
+                    fileName: (_format, entryName) => `${entryName}.js`
                 },
-                rollupOptions: {
-                    output: {
-                        entryFileNames: "backend.js",
-                        dir: "build"
-                    }
-                }
-            }
+                emptyOutDir: false,
+            },
         };
     }
 
     return {
-        root: "src/widgets",
-        plugins: [react(), viteStaticCopy({
-            targets: [
-                { src: "../../src/icons/*.*", dest: ".." },
-                { src: "../../src/manifest.json", dest: ".." },
-                { src: "../../src/settings.json", dest: ".." },
-            ]
-        })],
+        root: "./src",
+        plugins: [
+            react(),
+            tailwindcss(),
+            viteStaticCopy({
+                targets: [
+                    { src: "../manifest.json", dest: "." },
+                    { src: "settings.json", dest: "." },
+                    { src: "entity-extensions.json", dest: "." },
+                    { src: "icon.png", dest: "." },
+                ]
+            }),
+            viteStaticCopy({
+                targets: [
+                    // Widget icons and configurations
+                    { src: "widgets/**/*.{svg,png,jpg,json}", dest: "." }
+                ],
+                structured: true,
+
+            })
+        ],
+        base: "",
         build: {
-            outDir: "../../build/widgets",
-            assetsDir: "",
-            assetsInlineLimit: 0,
+            outDir: "../dist",
             emptyOutDir: true,
-            sourcemap: false, // enable for debugging purposes
+            copyPublicDir: false,
+            target: ["es2022"],
+            assetsDir: "widgets/assets",
+            sourcemap: true,
             rollupOptions: {
-                output: {
-                    entryFileNames: "[name].js",
-                    chunkFileNames: "[name].js",
-                    assetFileNames: "[name].[ext]"
+                input: {
+                    // List every widget entry point here
+                    issueMenuDemo: resolve(__dirname, "src/widgets/copy-or-move/index.html"),
                 }
             }
-        },
-        esbuild: {
-            supported: {
-                "top-level-await": true
-            }
-        },
+        }
     };
 });
