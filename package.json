@@ -27,9 +27,9 @@
     "@jetbrains/youtrack-apps-tools": "^0.0.2",
     "@tailwindcss/vite": "^4.1.10",
     "@types/node": "^24.0.3",
-    "@types/react": "^18.3.23",
-    "@types/react-dom": "^18.3.7",
-    "@vitejs/plugin-react": "^4.5.2",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^4.6.0",
     "eslint": "^9.29.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
@@ -37,8 +37,8 @@
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.2.0",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.34.1",
-    "vite": "^6.3.5",
-    "vite-plugin-static-copy": "^3.0.2"
+    "typescript-eslint": "^8.35.0",
+    "vite": "^7.0.0",
+    "vite-plugin-static-copy": "^3.1.0"
   }
 }
