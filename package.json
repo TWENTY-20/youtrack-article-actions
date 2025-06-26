@@ -4,10 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc -p tsconfig.app.json && vite build && vite build --mode workflows && youtrack-app validate dist",
+    "build": "tsc -p tsconfig.app.json && vite build && vite build --mode workflows && youtrack-app validate build",
     "lint": "eslint --report-unused-disable-directives --max-warnings 0",
-    "pack": "rm -rf archive_name.zip && npx --yes bestzip archive_name.zip dist/*",
-    "upload": "youtrack-app upload dist"
+    "pack": "rm -rf archive_name.zip && npx --yes bestzip archive_name.zip build/*",
+    "upload": "youtrack-app upload build"
   },
   "dependencies": {
     "@jetbrains/icons": "^5.10.0",

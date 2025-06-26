@@ -13,6 +13,7 @@ export default defineConfig(({ mode }) => {
         return {
             plugins: [],
             build: {
+                outDir: "../build",
                 lib: {
                     entry: [
                         "./src/workflows/translations.ts",
@@ -49,7 +50,7 @@ export default defineConfig(({ mode }) => {
         ],
         base: "",
         build: {
-            outDir: "../dist",
+            outDir: "../build",
             emptyOutDir: true,
             copyPublicDir: false,
             target: ["es2022"],
