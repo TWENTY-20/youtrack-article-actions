@@ -58,7 +58,7 @@ export default defineConfig(({ mode }) => {
             rollupOptions: {
                 input: {
                     // List every widget entry point here
-                    issueMenuDemo: resolve(__dirname, "src/widgets/copy-or-move/index.html"),
+                    copyOrMove: resolve(__dirname, "src/widgets/copy-or-move/index.html"),
                 }
             }
         }
