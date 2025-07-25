@@ -13,12 +13,12 @@ export async function isArticleDraft(articleId: string) {
     }>(`users/me/articleDrafts/${articleId}`).then(({ $type }) => $type === "ArticleDraft").catch(() => false);
 }
 
-export async function loadProjects() {
-    return await host.fetchYouTrack(`admin/projects?fields=id,name`) as Project[];
+export async function loadProjects(filter: string) {
+    return await host.fetchYouTrack(`admin/projects?fields=id,name&query=${filter}`) as Project[];
 }
 
-export async function loadProjectArticles(projectId: string) {
-    return await host.fetchYouTrack(`admin/projects/${projectId}/articles?fields=id,idReadable,summary`) as ArticleBase[];
+export async function loadProjectArticles(projectName: string, filter: string) {
+    return await host.fetchYouTrack(`articles?fields=id,idReadable,summary&query=${filter === "" ? "" : `{${filter}}+`}project:{${projectName}}`) as ArticleBase[];
 }
 
 export async function copyArticle(article: Article) {

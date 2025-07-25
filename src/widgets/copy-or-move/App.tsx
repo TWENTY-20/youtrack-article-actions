@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { APIError, Article, ArticleBase, Project } from "../../lib/types.ts";
 import Select from "@jetbrains/ring-ui-built/components/select/select";
 import { useTranslation } from "react-i18next";
@@ -36,16 +36,21 @@ export default function App() {
 
     const [article, setArticle] = useState<Article>();
     const [projects, setProjects] = useState<Project[]>();
+    const [articles, setArticles] = useState<ArticleBase[]>();
     const [selectedProject, setSelectedProject] = useState<Project>();
     const [selectedParentArticle, setSelectedParentArticle] = useState<ArticleBase>(TOP_LEVEL_ARTICLE);
     const [includeDescendents, setIncludeDescendents] = useState<boolean>(true);
+    const [projectFilter, setProjectFilter] = useState<string>("");
+    const [articleFilter, setArticleFilter] = useState<string>("");
 
     useEffect(() => {
         const articleId = YTApp.entity!.id;
         loadArticle(articleId).then((res: Article) => {
             setArticle(res);
             setSelectedProject(res.project);
-            if (res.parentArticle) setSelectedParentArticle(res.parentArticle);
+            if (res.parentArticle) {
+                setSelectedParentArticle(res.parentArticle);
+            }
         }).catch(async (err: APIError) => {
             if (err.status === 500 && await isArticleDraft(articleId)) {
                 setError(t("errorDraft"));
@@ -53,19 +58,54 @@ export default function App() {
             }
             setError(t("errorGeneral"));
         }).finally(() => setLoading(false));
+    }, [t]);
+
+    const fetchProjects = useCallback((filter: string) => {
+        loadProjects(filter)
+            .then((newProjects) => setProjects(newProjects));
     }, []);
 
-    if (loading) return (
-        <div className="flex justify-center items-center">
-            <Loader message={t("loading")}/>
-        </div>
-    );
+    useEffect(() => {
+        const debounce = setTimeout(() => {
+            if (!projects) return;
+            fetchProjects(projectFilter);
+        }, 500);
 
-    if (!article || !selectedProject) return (
-        <div className="w-full flex justify-center mt-12 text-base font-bold text-wrap">
-            <span>{error}</span>
-        </div>
-    );
+        return () => clearTimeout(debounce);
+    }, [fetchProjects, projectFilter]);
+
+    const fetchArticles = useCallback((projectId: string, filter: string) => {
+        loadProjectArticles(projectId, filter).then(articles => {
+            setArticles([TOP_LEVEL_ARTICLE, ...articles]);
+        }).catch(() => {
+            setArticles([TOP_LEVEL_ARTICLE]);
+        });
+    }, []);
+
+    useEffect(() => {
+        const debounce = setTimeout(() => {
+            if (!selectedProject?.id || !articles) return;
+            fetchArticles(selectedProject.name, articleFilter);
+        }, 500);
+
+        return () => clearTimeout(debounce);
+    }, [selectedProject, fetchArticles, articleFilter]);
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center">
+                <Loader message={t("loading")}/>
+            </div>
+        );
+    }
+
+    if (!article || !selectedProject) {
+        return (
+            <div className="w-full flex justify-center mt-12 text-base font-bold text-wrap">
+                <span>{error}</span>
+            </div>
+        );
+    }
 
     const moveButtonDisabled =
         selectedParentArticle === TOP_LEVEL_ARTICLE && article.parentArticle === null && selectedProject?.id === article.project.id
@@ -96,16 +136,26 @@ export default function App() {
                 <Select
                     id="projectSelection"
                     filter={{ placeholder: t("filterItems") }}
+                    onFilter={value => setProjectFilter(value)}
                     loading={projects == undefined}
                     loadingMessage={t("loading")}
                     notFoundMessage={t("noOptionsFound")}
                     onOpen={() => {
-                        if (projects) return;
-                        loadProjects().then(setProjects);
+                        if (projects) {
+                            return;
+                        }
+                        fetchProjects("");
+                    }}
+                    onClose={() => {
+                        if (projectFilter !== "") {
+                            setProjectFilter("");
+                        }
                     }}
                     data={projects?.map(projectToSelectItem)}
                     onSelect={(item) => {
-                        if (!item) return;
+                        if (!item) {
+                            return;
+                        }
                         setSelectedProject(item.model);
                         setSelectedParentArticle(TOP_LEVEL_ARTICLE);
                     }}
@@ -115,34 +165,29 @@ export default function App() {
             </div>
 
             {
-                selectedProject &&
                 <div>
                     <label htmlFor="parentArticleSelection">{t("parentArticleSelectionLabel")}</label>
                     <Select
                         id="parentArticleSelection"
                         filter={{ placeholder: t("filterItems") }}
-                        loading={selectedProject.articles == undefined}
+                        onFilter={(value) => setArticleFilter(value)}
+                        loading={articles === undefined}
                         loadingMessage={t("loading")}
                         notFoundMessage={t("noOptionsFound")}
                         onOpen={() => {
-                            if (selectedProject.articles) return;
-                            loadProjectArticles(selectedProject.id).then((res: ArticleBase[]) => {
-                                selectedProject.articles = [TOP_LEVEL_ARTICLE, ...res];
-                                setSelectedProject({ ...selectedProject });
-
-                                // Memoize the articles
-                                if (!projects) return;
-                                const index = projects.findIndex((proj) => proj.id === selectedProject.id);
-                                projects[index] = selectedProject;
-                                setProjects(projects);
-                            }).catch(() => {
-                                selectedProject.articles = [TOP_LEVEL_ARTICLE];
-                                setSelectedProject({ ...selectedProject });
-                            });
+                            if (!selectedProject || articles) return;
+                            fetchArticles(selectedProject?.name, "");
                         }}
-                        data={selectedProject.articles?.map(articleToSelectItem)}
+                        onClose={() => {
+                            if (articleFilter !== "") {
+                                setArticleFilter("");
+                            }
+                        }}
+                        data={articles?.map(articleToSelectItem)}
                         onSelect={(item) => {
-                            if (!item) return;
+                            if (!item) {
+                                return;
+                            }
                             setSelectedParentArticle(item.model);
                         }}
                         selected={articleToSelectItem(selectedParentArticle)}
@@ -163,55 +208,67 @@ export default function App() {
             </div>
 
             <div className="flex grow gap-x-4 pt-4">
-                <Button primary className="w-full" loader={buttonsLoading} onClick={() => {
-                    setButtonsLoading(true);
+                <Button
+                    primary
+                    className="w-full"
+                    loader={buttonsLoading}
+                    onClick={() => {
+                        setButtonsLoading(true);
 
-                    if (!article || !selectedProject) return;
+                        if (!article || !selectedProject) {
+                            return;
+                        }
 
-                    article.project = {
-                        id: selectedProject.id,
-                        name: selectedProject.name
-                    };
+                        article.project = {
+                            id: selectedProject.id,
+                            name: selectedProject.name
+                        };
 
-                    const parentArticle = selectedParentArticle === TOP_LEVEL_ARTICLE ? null : selectedParentArticle;
+                        const parentArticle = selectedParentArticle === TOP_LEVEL_ARTICLE ? null : selectedParentArticle;
 
-                    handleArticleCopy(article, includeDescendents, parentArticle).then(([article, noErrors]) => {
-                        if (noErrors)
-                            redirectToArticle(article.id);
-                        else
-                            host.alert(t("warnCopyErrorsOccurred"), AlertType.WARNING);
-                    }).catch((err: APIError) => {
-                        if (err.status === 403)
-                            host.alert(t("errorMissingPermission"));
-                        else
-                            host.alert(t("errorCopyArticle"), AlertType.ERROR);
-                    }).finally(() => setButtonsLoading(false));
-                }}>
+                        handleArticleCopy(article, includeDescendents, parentArticle).then(([article, noErrors]) => {
+                            if (noErrors) {
+                                redirectToArticle(article.id);
+                            } else {
+                                host.alert(t("warnCopyErrorsOccurred"), AlertType.WARNING);
+                            }
+                        }).catch((err: APIError) => {
+                            if (err.status === 403) {
+                                host.alert(t("errorMissingPermission"));
+                            } else {
+                                host.alert(t("errorCopyArticle"), AlertType.ERROR);
+                            }
+                        }).finally(() => setButtonsLoading(false));
+                    }}
+                >
                     {t("copyButtonLabel")}
                 </Button>
-                <Button primary
-                        className="w-full"
-                        loader={!moveButtonDisabled && buttonsLoading}
-                        disabled={moveButtonDisabled}
-                        onClick={() => {
-                            setButtonsLoading(true);
+                <Button
+                    primary
+                    className="w-full"
+                    loader={!moveButtonDisabled && buttonsLoading}
+                    disabled={moveButtonDisabled}
+                    onClick={() => {
+                        setButtonsLoading(true);
 
-                            const parentArticle = selectedParentArticle === TOP_LEVEL_ARTICLE ? undefined : selectedParentArticle;
+                        const parentArticle = selectedParentArticle === TOP_LEVEL_ARTICLE ? undefined : selectedParentArticle;
 
-                            const project = {
-                                id: selectedProject.id,
-                                name: selectedProject.name
-                            };
+                        const project = {
+                            id: selectedProject.id,
+                            name: selectedProject.name
+                        };
 
-                            moveArticle(article.idReadable, project, parentArticle).then(({ id }) => {
-                                redirectToArticle(id);
-                            }).catch((err: APIError) => {
-                                if (err.status === 403)
-                                    host.alert(t("errorMissingPermission"));
-                                else
-                                    host.alert(t("errorMoveArticle"), AlertType.ERROR);
-                            }).finally(() => setButtonsLoading(false));
-                        }}>
+                        moveArticle(article.idReadable, project, parentArticle).then(({ id }) => {
+                            redirectToArticle(id);
+                        }).catch((err: APIError) => {
+                            if (err.status === 403) {
+                                host.alert(t("errorMissingPermission"));
+                            } else {
+                                host.alert(t("errorMoveArticle"), AlertType.ERROR);
+                            }
+                        }).finally(() => setButtonsLoading(false));
+                    }}
+                >
                     {t("moveButtonLabel")}
                 </Button>
             </div>
@@ -232,8 +289,10 @@ async function handleArticleCopy(article: Article, includeDescendents: boolean, 
     const newArticle = await copyArticle(article);
 
     // noinspection ES6MissingAwait
-    let promises = [handleAttachments(article.id, newArticle.id)];
-    if (includeDescendents) promises.push(copyChildArticles(article, newArticle));
+    const promises = [handleAttachments(article.id, newArticle.id)];
+    if (includeDescendents) {
+        promises.push(copyChildArticles(article, newArticle));
+    }
 
     const results = await Promise.allSettled(promises);
     const noErrors = !results.some((result) => result.status === "rejected" || !result.value);
@@ -257,11 +316,15 @@ async function handleAttachments(oldArticleId: string, newArticleId: string) {
 }
 
 async function copyChildArticles(parentArticle: Article, newArticle: ArticleBase, visitedArticleIDs: Array<string> = []): Promise<boolean> {
-    if (!parentArticle.hasChildren) return true;
+    if (!parentArticle.hasChildren) {
+        return true;
+    }
 
     const promises = parentArticle.childArticles.map(async ({ id }) => {
         try {
-            if (visitedArticleIDs.includes(id)) return true;
+            if (visitedArticleIDs.includes(id)) {
+                return true;
+            }
 
             const article = await loadArticle(id).then((res) => ({ ...res, project: parentArticle.project }));
             const newChildArticle = await copyArticle({ ...article, parentArticle: newArticle });
