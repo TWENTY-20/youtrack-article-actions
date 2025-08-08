@@ -4,7 +4,7 @@
   "title": "YouTrack Article Actions",
   "description": "Copy or move an article in the Knowledge Base",
   "changeNotes": "See https://plugins.jetbrains.com/plugin/25371-youtrack-article-actions/release-notes",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "vendor": {
     "name": "twenty20",
     "url": "https://twenty20.de"
