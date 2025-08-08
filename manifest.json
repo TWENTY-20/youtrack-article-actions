@@ -9,7 +9,7 @@
     "name": "twenty20",
     "url": "https://twenty20.de"
   },
-  "icon": "icon.png",
+  "icon": "icon.svg",
   "minYouTrackVersion": "2025.1.0",
   "widgets": [
     {

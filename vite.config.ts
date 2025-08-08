@@ -36,7 +36,7 @@ export default defineConfig(({ mode }) => {
                     { src: "../manifest.json", dest: "." },
                     { src: "settings.json", dest: "." },
                     { src: "entity-extensions.json", dest: "." },
-                    { src: "icon.png", dest: "." },
+                    { src: "icon.svg", dest: "." },
                 ]
             }),
             viteStaticCopy({

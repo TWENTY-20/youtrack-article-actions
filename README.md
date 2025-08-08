@@ -1,4 +1,4 @@
-# <img src="/src/icon.png" alt="" width="35" /> YouTrack Article Actions
+# <img src="/src/icon.svg" alt="" width="35" /> YouTrack Article Actions
 
 Once installed into [JetBrains YouTrack](https://www.jetbrains.com/youtrack/), this App allows YouTrack users to copy or move articles in the Knowledge Base.
 
