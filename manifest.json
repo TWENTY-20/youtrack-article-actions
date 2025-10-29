@@ -16,6 +16,7 @@
       "key": "article-menu-demo",
       "name": "Copy or Move",
       "indexPath": "copy-or-move/index.html",
+      "guard": "({entity}) => !entity.draft && !entity.isEditing",
       "extensionPoint": "ARTICLE_OPTIONS_MENU_ITEM",
       "expectedDimensions": {
         "width": 360,
