@@ -112,7 +112,7 @@ export default function App() {
         || selectedParentArticle.id === article.parentArticle?.id;
 
     return (
-        <form className="w-full flex flex-col gap-y-6">
+        <form className="w-full flex flex-col gap-y-6 pr-1">
             <div>
                 <label htmlFor="titleInput">{t("titleInputLabel")}</label>
                 <Input
