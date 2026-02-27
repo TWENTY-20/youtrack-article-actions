@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
-import { APIError, Article, ArticleBase, Project } from "../../lib/types.ts";
+import {useCallback, useEffect, useState} from "react";
+import {APIError, Article, ArticleBase, Project} from "../../lib/types.ts";
 import Select from "@jetbrains/ring-ui-built/components/select/select";
-import { useTranslation } from "react-i18next";
+import {useTranslation} from "react-i18next";
 import {
     copyArticle,
     isArticleDraft,
@@ -13,10 +13,10 @@ import {
 } from "../../lib/api.ts";
 import Loader from "@jetbrains/ring-ui-built/components/loader/loader";
 import Button from "@jetbrains/ring-ui-built/components/button/button";
-import { Input, Size } from "@jetbrains/ring-ui-built/components/input/input";
-import YTApp, { host } from "../../lib/youTrackApp.ts";
+import {Input, Size} from "@jetbrains/ring-ui-built/components/input/input";
+import YTApp, {host} from "../../lib/youTrackApp.ts";
 import i18n from "../../lib/i18n.ts";
-import { AlertType } from "@jetbrains/ring-ui-built/components/alert/alert";
+import {AlertType} from "@jetbrains/ring-ui-built/components/alert/alert";
 import Checkbox from "@jetbrains/ring-ui-built/components/checkbox/checkbox";
 import Tooltip from "@jetbrains/ring-ui-built/components/tooltip/tooltip";
 
@@ -28,7 +28,7 @@ const TOP_LEVEL_ARTICLE: ArticleBase = {
 
 //todo: hide widget in draft menu - currently not possible
 export default function App() {
-    const { t } = useTranslation();
+    const {t} = useTranslation();
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -135,7 +135,7 @@ export default function App() {
                 <label htmlFor="projectSelection">{t("projectSelectionLabel")}</label>
                 <Select
                     id="projectSelection"
-                    filter={{ placeholder: t("filterItems") }}
+                    filter={{placeholder: t("filterItems")}}
                     onFilter={value => setProjectFilter(value)}
                     loading={projects == undefined}
                     loadingMessage={t("loading")}
@@ -169,7 +169,7 @@ export default function App() {
                     <label htmlFor="parentArticleSelection">{t("parentArticleSelectionLabel")}</label>
                     <Select
                         id="parentArticleSelection"
-                        filter={{ placeholder: t("filterItems") }}
+                        filter={{placeholder: t("filterItems")}}
                         onFilter={(value) => setArticleFilter(value)}
                         loading={articles === undefined}
                         loadingMessage={t("loading")}
@@ -258,7 +258,7 @@ export default function App() {
                             name: selectedProject.name
                         };
 
-                        moveArticle(article.idReadable, project, parentArticle).then(({ id }) => {
+                        moveArticle(article.idReadable, project, parentArticle).then(({id}) => {
                             redirectToArticle(id);
                         }).catch((err: APIError) => {
                             if (err.status === 403) {
@@ -276,7 +276,7 @@ export default function App() {
     );
 }
 
-const projectToSelectItem = (it: Project) => ({ key: it.id, label: it.name, model: it });
+const projectToSelectItem = (it: Project) => ({key: it.id, label: it.name, model: it});
 const articleToSelectItem = (it: ArticleBase) => ({
     key: it.id,
     label: it.summary,
@@ -288,14 +288,16 @@ async function handleArticleCopy(article: Article, includeDescendents: boolean, 
     article.parentArticle = parentArticle;
     const newArticle = await copyArticle(article);
 
-    // noinspection ES6MissingAwait
-    const promises = [handleAttachments(article.id, newArticle.id)];
-    if (includeDescendents) {
-        promises.push(copyChildArticles(article, newArticle));
+    let noErrors = true;
+    try {
+        noErrors = await handleAttachments(article.id, newArticle.id) && noErrors;
+        if (includeDescendents) {
+            noErrors = await copyChildArticles(article, newArticle) && noErrors;
+        }
+    } catch (e) {
+        console.error(e);
+        noErrors = false;
     }
-
-    const results = await Promise.allSettled(promises);
-    const noErrors = !results.some((result) => result.status === "rejected" || !result.value);
 
     return [newArticle, noErrors];
 }
@@ -307,7 +309,7 @@ async function handleAttachments(oldArticleId: string, newArticleId: string) {
 
     for (const result of attachmentResults) {
         if (result.status === "rejected") {
-            host.alert(i18n.t("errorCopyAttachment", { "name": result.name }), AlertType.ERROR);
+            host.alert(i18n.t("errorCopyAttachment", {"name": result.oldName}), AlertType.ERROR);
             anyAttachmentErrored = true;
         }
     }
@@ -315,35 +317,31 @@ async function handleAttachments(oldArticleId: string, newArticleId: string) {
     return !anyAttachmentErrored;
 }
 
-async function copyChildArticles(parentArticle: Article, newArticle: ArticleBase, visitedArticleIDs: Array<string> = []): Promise<boolean> {
+async function copyChildArticles(parentArticle: Article, newArticle: ArticleBase, visitedArticleIDs: Set<string> = new Set<string>()): Promise<boolean> {
     if (!parentArticle.hasChildren) {
         return true;
     }
 
-    const promises = parentArticle.childArticles.map(async ({ id }) => {
+    let noErrors = true;
+
+    for (const child of parentArticle.childArticles) {
         try {
-            if (visitedArticleIDs.includes(id)) {
-                return true;
+            if (visitedArticleIDs.has(child.id)) {
+                continue;
             }
 
-            const article = await loadArticle(id).then((res) => ({ ...res, project: parentArticle.project }));
-            const newChildArticle = await copyArticle({ ...article, parentArticle: newArticle });
+            const article = await loadArticle(child.id).then((res) => ({...res, project: parentArticle.project}));
+            const newChildArticle = await copyArticle({...article, parentArticle: newArticle});
 
-            const results = await Promise.allSettled(
-                [
-                    handleAttachments(id, newChildArticle.id),
-                    copyChildArticles(article, newChildArticle, visitedArticleIDs.concat(newArticle.id))
-                ]
-            );
-            return !results.some((result) => result.status === "rejected" || !result.value);
+            noErrors = await handleAttachments(child.id, newChildArticle.id) && noErrors;
+            noErrors = await copyChildArticles(article, newChildArticle, visitedArticleIDs.add(newArticle.id)) && noErrors;
         } catch (_) {
-            host.alert(i18n.t("errorCopyChildArticle", { "id": id }), AlertType.ERROR);
-            return false;
+            host.alert(i18n.t("errorCopyChildArticle", {"id": child.id}), AlertType.ERROR);
+            noErrors = false;
         }
-    });
+    }
 
-    const results = await Promise.allSettled(promises);
-    return !results.some((result) => result.status === "rejected" || !result.value);
+    return noErrors;
 }
 
 function redirectToArticle(id: string) {

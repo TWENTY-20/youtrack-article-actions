@@ -1,5 +1,5 @@
-import { host } from "./youTrackApp.ts";
-import { Article, ArticleBase, Attachment, Project } from "./types.ts";
+import {host} from "./youTrackApp.ts";
+import {Article, ArticleBase, Attachment, Project} from "./types.ts";
 
 export async function loadArticle(articleId: string) {
     return await host.fetchYouTrack(
@@ -10,7 +10,7 @@ export async function loadArticle(articleId: string) {
 export async function isArticleDraft(articleId: string) {
     return await host.fetchYouTrack<{
         $type: string
-    }>(`users/me/articleDrafts/${articleId}`).then(({ $type }) => $type === "ArticleDraft").catch(() => false);
+    }>(`users/me/articleDrafts/${articleId}`).then(({$type}) => $type === "ArticleDraft").catch(() => false);
 }
 
 export async function loadProjects(filter: string) {
@@ -30,28 +30,59 @@ export async function copyArticle(article: Article) {
 
 export async function loadAndCopyAttachmentsToArticle(oldArticleId: string, newArticleId: string) {
     const attachments: Attachment[] = await host.fetchYouTrack(`articles/${oldArticleId}/attachments?fields=id,name,base64Content,visibility(id)&muteUpdateNotifications=true`);
-    const attachmentRequests = attachments.map(async (att) => {
+    const results: ({
+        status: "success";
+        id: string;
+        name: string;
+    } | {
+        status: "rejected";
+        oldName: string;
+    })[] = [];
+    for (const att of attachments) {
         let fileName = att.name ?? "missing-name";
         const formData = new FormData();
         await fetch(att.base64Content ?? "data:;base64")
             .then(res => res.blob()).then((blob) => formData.append(fileName, new File([blob], fileName)));
 
-        return await host.fetchYouTrack(`articles/${newArticleId}/attachments?fields=id,name`, {
-            method: "POST",
-            headers: {
-                "Content-Type": undefined,
-            },
-            sendRawBody: true,
+        const tempResponse = new Response(formData);
+        const blobBody = await tempResponse.blob();
+        const contentType = tempResponse.headers.get("content-type");
 
-            body: formData
-        });
-    });
-    const results = await Promise.allSettled(attachmentRequests);
-    return results.map((result, index) => ({
-        status: result.status,
-        id: attachments[index].id,
-        name: attachments[index].name,
-    }));
+        let result: {
+            status: "success";
+            id: string;
+            name: string;
+        } | {
+            status: "rejected";
+            oldName: string;
+        };
+        try {
+            const response = await host.fetchYouTrack<{
+                id: string;
+                name: string;
+            }>(`articles/${newArticleId}/attachments?fields=id,name`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": contentType ?? "multipart/form-data",
+                },
+                sendRawBody: true,
+                body: blobBody
+            });
+            result = {
+                status: "success",
+                id: response.id,
+                name: response.name,
+            };
+        } catch (e) {
+            console.error(`Failed to upload attachment ${fileName} for article ${newArticleId}:`, e);
+            result = {
+                status: "rejected",
+                oldName: fileName,
+            };
+        }
+        results.push(result);
+    }
+    return results;
 }
 
 export async function moveArticle(idReadable: string, project: Project, parentArticle?: ArticleBase) {
