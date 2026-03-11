@@ -4,7 +4,7 @@ type AppAPI = {
 }
 
 import type AlertService from "@jetbrains/ring-ui-built/components/alert-service/alert-service";
-import type { RequestParams } from "@jetbrains/ring-ui-built/components/http/http";
+import type {RequestParams} from "@jetbrains/ring-ui-built/components/http/http";
 
 export interface HubService {
     id: string;
@@ -13,10 +13,12 @@ export interface HubService {
 }
 
 interface BaseAPILayer {
-    alert: (...args: Parameters<(typeof AlertService)["addAlert"]>) => void;
-    enterModalMode: Promise<() => void>;
-    exitModalMode: Promise<() => void>;
-    collapse: () => void;
+    alert: (message: string, type?: AlertType, timeout?: number) => void;
+    enterModalMode: () => Promise<void>;
+    exitModalMode: () => Promise<void>;
+    collapse: () => Promise<void>;
+    closeWidget: () => Promise<void>;
+    reportWidgetSize: ({height, width}?: { height: number, width: number }) => Promise<void>;
 }
 
 /*
@@ -163,14 +165,11 @@ export interface Article extends ArticleBase {
     readonly childArticles: Array<Pick<Article, "id">>,
     readonly comments: Array<{ readonly id: string }>,
     content: string | null,
-    // readonly created: number,
     readonly hasChildren: boolean,
-    // readonly ordinal: number,
     parentArticle: ArticleBase | null,
     project: Project,
-    // readonly reporter: { readonly id: string } | null,
-    // readonly updated: number,
-    // readonly updatedBy: { readonly id: string } | null,
+    reporter: { readonly id: string } | null,
+    tags: { readonly id: string }[],
     visibility: { readonly id: string } | null,
 }
 
@@ -184,5 +183,4 @@ export interface Attachment {
     readonly id: string,
     name: string | null,
     base64Content: string | null,
-    visibility: { readonly id: string } | null,
 }

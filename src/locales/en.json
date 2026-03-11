@@ -11,6 +11,8 @@
   "includeDescendentsInfo": "Condition only applies for 'Copy' - 'Move' always includes all sub-articles",
   "copyButtonLabel": "Copy",
   "moveButtonLabel": "Move",
+  "progressText": "Copying Article {{id}}",
+  "progressTextAttachment": "Copying Article {{id}} - Attachment {{attachmentIndex}} / {{totalAttachments}}",
   "errorDraft": "Draft Articles can not be copied or moved!",
   "errorGeneral": "Widget could not load Article details!",
   "errorMissingPermissions": "You are missing permissions!",

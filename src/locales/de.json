@@ -11,6 +11,8 @@
   "includeDescendentsInfo": "Bedingung gilt nur für „Kopieren“ - „Verschieben“ umfasst immer alle Unterartikel",
   "copyButtonLabel": "Kopieren",
   "moveButtonLabel": "Verschieben",
+  "progressText": "Kopiere Artikel {{id}}",
+  "progressTextAttachment": "Kopiere Artikel {{id}} - Attachment {{attachmentIndex}} / {{totalAttachments}}",
   "errorDraft": "Entwürfe können nicht kopiert oder verschoben werden!",
   "errorGeneral": "Die Artikeldetails konnten nicht geladen werden!",
   "errorMissingPermissions": "Ihnen fehlen Berechtigungen!",
