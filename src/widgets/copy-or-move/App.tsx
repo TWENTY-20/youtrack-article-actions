@@ -152,8 +152,6 @@ export function App() {
     type HandleArticleCopy = (article: Article, includeDescendants: boolean, parentArticle: ArticleBase | null, visitedArticleIDs?: Set<string>) => Promise<[ArticleBase, boolean]>
     const handleArticleCopy: HandleArticleCopy = useCallback<HandleArticleCopy>(async (...args) => {
         const handleArticleCopy: HandleArticleCopy = async (article, includeDescendants, parentArticle, visitedArticleIDs = new Set<string>()) => {
-            await new Promise((resolve) => setTimeout(resolve, 5000));
-
             const newArticle = await copyArticle({...article, parentArticle});
             visitedArticleIDs.add(newArticle.id);
             updateProgress(article.id);
