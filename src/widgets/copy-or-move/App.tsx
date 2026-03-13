@@ -129,7 +129,7 @@ export function App() {
         setCurrentProgress((currentProgress) => currentProgress + 1);
     }, [t]);
 
-    const handleAttachments = useCallback(async (oldArticleId: string, newArticleId: string) => {
+    const handleAttachments = useCallback(async (oldArticleId: string, newArticleId: string, newArticleIdReadable: string) => {
         const attachments = await loadAttachments(oldArticleId);
 
         let anyAttachmentErrored = false;
@@ -138,7 +138,7 @@ export function App() {
             const attachment = attachments[i];
             try {
                 await copyAttachment(newArticleId, attachment);
-                updateProgress(newArticleId, {index: i, total: attachments.length});
+                updateProgress(newArticleIdReadable, {index: i, total: attachments.length});
             } catch (e) {
                 console.error(e);
                 host.alert(i18n.t("errorCopyAttachment", {"name": attachment.name}), AlertType.ERROR);
@@ -154,11 +154,11 @@ export function App() {
         const handleArticleCopy: HandleArticleCopy = async (article, includeDescendants, parentArticle, visitedArticleIDs = new Set<string>()) => {
             const newArticle = await copyArticle({...article, parentArticle});
             visitedArticleIDs.add(newArticle.id);
-            updateProgress(article.id);
+            updateProgress(article.idReadable);
 
             let errored = false;
             try {
-                const attachmentError = await handleAttachments(article.id, newArticle.id);
+                const attachmentError = await handleAttachments(article.id, newArticle.id, newArticle.idReadable);
                 errored = attachmentError || errored;
 
                 if (includeDescendants) {
