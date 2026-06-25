@@ -9,6 +9,7 @@
     ],
     "module": "ESNext",
     "skipLibCheck": true,
+    "resolveJsonModule": true,
 
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -19,10 +20,15 @@
     "jsx": "react-jsx",
 
     /* Linting */
-    "strict": true
+    "strict": true,
+    "rootDir": "./src",
+    // Needed for the workflows
+    "types": [
+      "node"
+    ]
   },
   "include": [
     "src",
-    "@types"
+    "typings.d.ts"
   ]
 }

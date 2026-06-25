@@ -1,14 +1,23 @@
-import { resolve } from "node:path";
-import { defineConfig } from "vite";
-import { viteStaticCopy } from "vite-plugin-static-copy";
+import {resolve} from "node:path";
+import {defineConfig} from "vite";
+import {viteStaticCopy} from "vite-plugin-static-copy";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
 /*
       See https://vitejs.dev/config/
 */
+enum Environment {
+    DEV = "dev",
+    PROD = "prod",
+}
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({mode}) => {
+    let environment = Environment.PROD;
+    if (process.env.ENV === Environment.DEV) {
+        environment = Environment.DEV;
+    }
+
     if (mode === "workflows") {
         return {
             plugins: [],
@@ -33,19 +42,17 @@ export default defineConfig(({ mode }) => {
             tailwindcss(),
             viteStaticCopy({
                 targets: [
-                    { src: "../manifest.json", dest: "." },
-                    { src: "settings.json", dest: "." },
-                    { src: "entity-extensions.json", dest: "." },
-                    { src: "icon.svg", dest: "." },
+                    {src: "../manifest.json", dest: "build"},
+                    {src: "settings.json", dest: "."},
+                    {src: "entity-extensions.json", dest: "."},
+                    {src: "icon.svg", dest: "."},
                 ]
             }),
             viteStaticCopy({
                 targets: [
                     // Widget icons and configurations
-                    { src: "widgets/**/*.{svg,png,jpg,json}", dest: "." }
+                    {src: "widgets/**/*.{svg,png,jpg,json}", dest: "."}
                 ],
-                structured: true,
-
             })
         ],
         base: "",
@@ -55,7 +62,7 @@ export default defineConfig(({ mode }) => {
             copyPublicDir: false,
             target: ["es2022"],
             assetsDir: "widgets/assets",
-            sourcemap: true,
+            sourcemap: environment === Environment.DEV,
             rollupOptions: {
                 input: {
                     // List every widget entry point here
